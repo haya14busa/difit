@@ -38,6 +38,11 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
   const [error, setError] = useState<string | null>(null);
 
   const connectToWatch = useCallback(() => {
+    // Disable in static mode
+    if (window.__STATIC_MODE__) {
+      return;
+    }
+
     if (eventSourceRef.current) {
       return; // Already connected
     }

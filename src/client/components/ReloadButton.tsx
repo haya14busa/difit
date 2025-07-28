@@ -15,7 +15,8 @@ export function ReloadButton({
   changeType,
   className = '',
 }: ReloadButtonProps) {
-  if (!shouldReload) {
+  // Disable in static mode
+  if (window.__STATIC_MODE__ || !shouldReload) {
     return null;
   }
 

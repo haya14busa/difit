@@ -4,6 +4,8 @@ import { join } from 'path';
 import { GitDiffParser } from '../shared/git-parser.js';
 import { type DiffResponse } from '../types/diff.js';
 
+import { generateStaticHtml } from './html-generator.js';
+
 export interface ExportOptions {
   targetCommitish: string;
   baseCommitish: string;
@@ -49,4 +51,7 @@ export async function exportStaticSite(outputDir: string, options: ExportOptions
 
   // Write diff data as JSON
   await writeFile(join(outputDir, 'diff-data.json'), JSON.stringify(staticData), 'utf-8');
+
+  // Generate static HTML
+  await generateStaticHtml(outputDir);
 }

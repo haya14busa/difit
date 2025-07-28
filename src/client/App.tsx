@@ -162,17 +162,32 @@ function App() {
 
   const fetchDiffData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/diff?ignoreWhitespace=${ignoreWhitespace}`);
-      if (!response.ok) throw new Error('Failed to fetch diff data');
-      const data = (await response.json()) as DiffResponse;
-      setDiffData(data);
+      // Check if we're in static mode
+      if (window.__STATIC_MODE__ && window.__STATIC_DIFF_DATA__) {
+        const staticData = window.__STATIC_DIFF_DATA__;
+        const data = ignoreWhitespace ? staticData.ignoreWhitespace : staticData.showWhitespace;
+        setDiffData(data);
 
-      // Set diff mode from server response if provided
-      if (data.mode) {
-        setDiffMode(data.mode as 'side-by-side' | 'inline');
+        // Set diff mode from static data
+        if (staticData.mode) {
+          setDiffMode(staticData.mode as 'side-by-side' | 'inline');
+        }
+
+        // Lock files are now automatically marked as viewed by useViewedFiles hook
+      } else {
+        // Normal server mode
+        const response = await fetch(`/api/diff?ignoreWhitespace=${ignoreWhitespace}`);
+        if (!response.ok) throw new Error('Failed to fetch diff data');
+        const data = (await response.json()) as DiffResponse;
+        setDiffData(data);
+
+        // Set diff mode from server response if provided
+        if (data.mode) {
+          setDiffMode(data.mode as 'side-by-side' | 'inline');
+        }
+
+        // Lock files are now automatically marked as viewed by useViewedFiles hook
       }
-
-      // Lock files are now automatically marked as viewed by useViewedFiles hook
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {

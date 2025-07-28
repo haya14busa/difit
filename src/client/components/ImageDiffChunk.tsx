@@ -69,6 +69,20 @@ export function ImageDiffChunk({
   };
 
   // Checkerboard background style for transparent images
+  // Helper to get image URL in static or server mode
+  const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {
+    if (window.__STATIC_MODE__) {
+      const baseName =
+        path
+          .split('/')
+          .pop()
+          ?.replace(/\.[^.]+$/, '') || '';
+      const ext = path.split('.').pop() || '';
+      return `./images/${baseName}_${version}.${ext}`;
+    }
+    return `/api/blob/${path}?ref=${ref}`;
+  };
+
   const checkerboardStyle = {
     backgroundImage: `
       linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%),
@@ -92,7 +106,7 @@ export function ImageDiffChunk({
               Previous version:
             </div>
             <img
-              src={`/api/blob/${file.oldPath || file.path}?ref=${baseRef}`}
+              src={getImageUrl(file.oldPath || file.path, baseRef, 'old')}
               alt={`Previous version of ${file.oldPath || file.path}`}
               className="max-w-full max-h-96 border border-github-border rounded mx-auto"
               style={checkerboardStyle}
@@ -132,7 +146,7 @@ export function ImageDiffChunk({
               New file:
             </div>
             <img
-              src={`/api/blob/${file.path}?ref=${targetRef}`}
+              src={getImageUrl(file.path, targetRef, 'new')}
               alt={`New image ${file.path}`}
               className="max-w-full max-h-96 border border-github-border rounded mx-auto"
               style={checkerboardStyle}
@@ -175,7 +189,7 @@ export function ImageDiffChunk({
                   Previous version:
                 </div>
                 <img
-                  src={`/api/blob/${file.oldPath || file.path}?ref=${baseRef}`}
+                  src={getImageUrl(file.oldPath || file.path, baseRef, 'old')}
                   alt={`Previous version of ${file.oldPath || file.path}`}
                   className="max-w-full max-h-96 border border-github-border rounded mx-auto"
                   style={checkerboardStyle}
@@ -206,7 +220,7 @@ export function ImageDiffChunk({
                   Current version:
                 </div>
                 <img
-                  src={`/api/blob/${file.path}?ref=${targetRef}`}
+                  src={getImageUrl(file.path, targetRef, 'new')}
                   alt={`Current version of ${file.path}`}
                   className="max-w-full max-h-96 border border-github-border rounded mx-auto"
                   style={checkerboardStyle}
@@ -247,7 +261,7 @@ export function ImageDiffChunk({
                   Previous version:
                 </div>
                 <img
-                  src={`/api/blob/${file.oldPath || file.path}?ref=${baseRef}`}
+                  src={getImageUrl(file.oldPath || file.path, baseRef, 'old')}
                   alt={`Previous version of ${file.oldPath || file.path}`}
                   className="max-w-full max-h-96 border border-github-border rounded mx-auto"
                   style={checkerboardStyle}
@@ -278,7 +292,7 @@ export function ImageDiffChunk({
                   Current version:
                 </div>
                 <img
-                  src={`/api/blob/${file.path}?ref=${targetRef}`}
+                  src={getImageUrl(file.path, targetRef, 'new')}
                   alt={`Current version of ${file.path}`}
                   className="max-w-full max-h-96 border border-github-border rounded mx-auto"
                   style={checkerboardStyle}

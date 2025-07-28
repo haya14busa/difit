@@ -14,6 +14,11 @@ vi.mock('../shared/git-parser.js', () => ({
 
 vi.mock('fs/promises');
 
+// Mock html-generator
+vi.mock('./html-generator.js', () => ({
+  generateStaticHtml: vi.fn(),
+}));
+
 describe('exportStaticSite', () => {
   beforeEach(() => {
     vi.clearAllMocks();
