@@ -238,6 +238,11 @@ function App() {
 
   // Send comments to server whenever they change and before page unload
   useEffect(() => {
+    // Skip in static mode
+    if (window.__STATIC_MODE__) {
+      return;
+    }
+
     // Sync comments whenever they change
     if (comments.length > 0) {
       const data = JSON.stringify({ comments });
@@ -268,6 +273,11 @@ function App() {
 
   // Establish SSE connection for tab close detection
   useEffect(() => {
+    // Skip in static mode
+    if (window.__STATIC_MODE__) {
+      return;
+    }
+
     const eventSource = new EventSource('/api/heartbeat');
 
     eventSource.onopen = () => {
