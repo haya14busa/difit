@@ -29,7 +29,9 @@
     "src/server/**/*",
     "src/types/**/*",
     "src/tui/**/*",
-    "src/utils/**/*"
+    "src/utils/**/*",
+    "src/shared/**/*",
+    "src/static/**/*"
   ],
   "exclude": ["src/client/**/*", "node_modules", "dist", "tests"]
 }

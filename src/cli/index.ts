@@ -170,8 +170,13 @@ program
 
       if (options.export) {
         // Handle static export
-        console.log(`Exporting static site to: ${options.export}`);
-        // TODO: Implement actual export functionality
+        const { exportStaticSite } = await import('../static/export.js');
+        await exportStaticSite(options.export, {
+          targetCommitish,
+          baseCommitish,
+          mode: options.mode,
+        });
+        console.log(`✅ Static site exported to: ${options.export}`);
         return;
       }
 

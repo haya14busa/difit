@@ -159,7 +159,14 @@ const config: Linter.Config[] = [
 
   // Server/CLI TypeScript files
   {
-    files: ['src/cli/**/*.ts', 'src/server/**/*.ts', 'src/types/**/*.ts', 'src/utils/**/*.ts'],
+    files: [
+      'src/cli/**/*.ts',
+      'src/server/**/*.ts',
+      'src/types/**/*.ts',
+      'src/utils/**/*.ts',
+      'src/shared/**/*.ts',
+      'src/static/**/*.ts',
+    ],
     languageOptions: {
       parser: tsParser,
       parserOptions: baseParserOptions,
