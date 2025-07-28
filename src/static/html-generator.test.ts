@@ -39,7 +39,7 @@ describe('HtmlGenerator', () => {
       );
     });
 
-    it('should embed diff data as global variable in HTML', async () => {
+    it('should set static mode flag in HTML', async () => {
       const mockDiffData = {
         ignoreWhitespace: { files: [], commit: 'abc123', isEmpty: false },
         showWhitespace: { files: [], commit: 'abc123', isEmpty: false },
@@ -59,12 +59,10 @@ describe('HtmlGenerator', () => {
       const { generateStaticHtml } = await import('./html-generator.js');
       await generateStaticHtml('./output');
 
-      // Should embed diff data
-      expect(capturedHtml).toContain('window.__STATIC_DIFF_DATA__');
-      // Check that data is embedded (double-encoded for safety)
-      expect(capturedHtml).toContain('window.__STATIC_DIFF_DATA__');
-      expect(capturedHtml).toContain('ignoreWhitespace');
-      expect(capturedHtml).toContain('showWhitespace');
+      // Should set static mode flag
+      expect(capturedHtml).toContain('window.__STATIC_MODE__ = true');
+      // Should not embed diff data
+      expect(capturedHtml).not.toContain('window.__STATIC_DIFF_DATA__');
     });
 
     it('should include client bundle and styles', async () => {
@@ -88,8 +86,8 @@ describe('HtmlGenerator', () => {
       await generateStaticHtml('./output');
 
       // Should include client assets
-      expect(capturedHtml).toContain('<script');
-      expect(capturedHtml).toContain('<link rel="stylesheet"');
+      expect(capturedHtml).toContain('<script type="module" src="./assets/');
+      expect(capturedHtml).toContain('<link rel="stylesheet" href="./assets/');
       expect(capturedHtml).toContain('<div id="root"></div>');
     });
 

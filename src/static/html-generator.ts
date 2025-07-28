@@ -23,8 +23,11 @@ export async function generateStaticHtml(outputDir: string): Promise<void> {
   // Copy client assets
   await copyClientAssets(outputDir);
 
-  // Generate HTML with embedded data
-  const html = generateHtmlTemplate(diffData);
+  // Find actual asset file names
+  const { jsFile, cssFile } = await findAssetFiles(join(outputDir, 'assets'));
+
+  // Generate HTML with correct asset references
+  const html = generateHtmlTemplate(diffData, jsFile, cssFile);
   await writeFile(join(outputDir, 'index.html'), html, 'utf-8');
 }
 
@@ -93,24 +96,37 @@ async function copyClientAssets(outputDir: string): Promise<void> {
   }
 }
 
-function generateHtmlTemplate(diffData: StaticDiffData): string {
+async function findAssetFiles(assetsDir: string): Promise<{ jsFile: string; cssFile: string }> {
+  try {
+    const files = await readdir(assetsDir);
+    const jsFile =
+      files.find((f) => typeof f === 'string' && f.startsWith('index-') && f.endsWith('.js')) ||
+      'index.js';
+    const cssFile =
+      files.find((f) => typeof f === 'string' && f.startsWith('index-') && f.endsWith('.css')) ||
+      'index.css';
+    return { jsFile, cssFile };
+  } catch {
+    return { jsFile: 'index.js', cssFile: 'index.css' };
+  }
+}
+
+function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>
-  <link rel="stylesheet" href="./assets/index.css">
+  <link rel="stylesheet" href="./assets/${cssFile}">
   <script>
-    // Embed diff data - properly escaped for HTML
-    window.__STATIC_DIFF_DATA__ = JSON.parse(${JSON.stringify(JSON.stringify(diffData))});
     // Set static mode flag
     window.__STATIC_MODE__ = true;
   </script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="./assets/index.js"></script>
+  <script type="module" src="./assets/${jsFile}"></script>
 </body>
 </html>`;
 }

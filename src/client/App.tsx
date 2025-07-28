@@ -163,8 +163,16 @@ function App() {
   const fetchDiffData = useCallback(async () => {
     try {
       // Check if we're in static mode
-      if (window.__STATIC_MODE__ && window.__STATIC_DIFF_DATA__) {
-        const staticData = window.__STATIC_DIFF_DATA__;
+      if (window.__STATIC_MODE__) {
+        const response = await fetch('./diff-data.json');
+        if (!response.ok) throw new Error('Failed to fetch static diff data');
+        const staticData = (await response.json()) as {
+          ignoreWhitespace: DiffResponse;
+          showWhitespace: DiffResponse;
+          mode: string;
+          baseCommitish: string;
+          targetCommitish: string;
+        };
         const data = ignoreWhitespace ? staticData.ignoreWhitespace : staticData.showWhitespace;
         setDiffData(data);
 

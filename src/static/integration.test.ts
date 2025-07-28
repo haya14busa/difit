@@ -30,7 +30,7 @@ describe('Static Export Integration', () => {
     const indexHtml = await readFile(join(testOutputDir, 'index.html'), 'utf-8');
     expect(indexHtml).toContain('<!DOCTYPE html>');
     expect(indexHtml).toContain('window.__STATIC_MODE__ = true');
-    expect(indexHtml).toContain('window.__STATIC_DIFF_DATA__');
+    expect(indexHtml).not.toContain('window.__STATIC_DIFF_DATA__');
 
     // Check diff data
     const diffData = await readFile(join(testOutputDir, 'diff-data.json'), 'utf-8');
@@ -55,7 +55,7 @@ describe('Static Export Integration', () => {
     expect(parsedData.ignoreWhitespace.commit).toContain('Working Directory');
   });
 
-  it('should embed static data in HTML correctly', async () => {
+  it('should generate static data JSON file correctly', async () => {
     await exportStaticSite(testOutputDir, {
       targetCommitish: 'HEAD',
       baseCommitish: 'HEAD~2',
@@ -63,17 +63,15 @@ describe('Static Export Integration', () => {
     });
 
     const html = await readFile(join(testOutputDir, 'index.html'), 'utf-8');
+    expect(html).toContain('window.__STATIC_MODE__ = true');
+    expect(html).not.toContain('window.__STATIC_DIFF_DATA__');
 
-    // Extract embedded JSON from HTML
-    const jsonMatch = html.match(/window\.__STATIC_DIFF_DATA__ = JSON\.parse\((.*)\);/s);
-    expect(jsonMatch).toBeTruthy();
-
-    if (jsonMatch) {
-      const embeddedData = JSON.parse(JSON.parse(jsonMatch[1]));
-      expect(embeddedData).toHaveProperty('ignoreWhitespace');
-      expect(embeddedData).toHaveProperty('showWhitespace');
-      expect(embeddedData).toHaveProperty('targetCommitish', 'HEAD');
-      expect(embeddedData).toHaveProperty('baseCommitish', 'HEAD~2');
-    }
+    // Check the separate JSON file
+    const diffData = await readFile(join(testOutputDir, 'diff-data.json'), 'utf-8');
+    const parsedData = JSON.parse(diffData);
+    expect(parsedData).toHaveProperty('ignoreWhitespace');
+    expect(parsedData).toHaveProperty('showWhitespace');
+    expect(parsedData).toHaveProperty('targetCommitish', 'HEAD');
+    expect(parsedData).toHaveProperty('baseCommitish', 'HEAD~2');
   });
 });
