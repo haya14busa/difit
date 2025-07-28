@@ -52,6 +52,7 @@ interface CliOptions {
   tui?: boolean;
   pr?: string;
   clean?: boolean;
+  export?: string;
 }
 
 const program = new Command();
@@ -76,10 +77,27 @@ program
   .option('--tui', 'use terminal UI instead of web interface')
   .option('--pr <url>', 'GitHub PR URL to review (e.g., https://github.com/owner/repo/pull/123)')
   .option('--clean', 'start with a clean slate by clearing all existing comments')
+  .option('--export <dir>', 'export diff as a static site to the specified directory')
   .action(async (commitish: string, compareWith: string | undefined, options: CliOptions) => {
     try {
-      // Check if we should read from stdin
-      const shouldReadStdin = !process.stdin.isTTY || commitish === '-';
+      // Check if we should read from stdin (only when - is explicitly passed)
+      const shouldReadStdin = commitish === '-';
+
+      // Validate --export conflicts
+      if (options.export) {
+        if (options.tui) {
+          console.error('Error: --export and --tui options cannot be used together');
+          process.exit(1);
+        }
+        if (options.pr) {
+          console.error('Error: --export cannot be used with --pr option');
+          process.exit(1);
+        }
+        if (shouldReadStdin) {
+          console.error('Error: --export cannot be used with stdin input');
+          process.exit(1);
+        }
+      }
 
       if (shouldReadStdin) {
         // Read unified diff from stdin
@@ -148,6 +166,13 @@ program
       if (commitish === 'working' || commitish === '.') {
         const git = simpleGit();
         await handleUntrackedFiles(git);
+      }
+
+      if (options.export) {
+        // Handle static export
+        console.log(`Exporting static site to: ${options.export}`);
+        // TODO: Implement actual export functionality
+        return;
       }
 
       if (options.tui) {
