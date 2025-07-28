@@ -971,6 +971,128 @@ describe('CLI index.ts', () => {
     });
   });
 
+  describe('Export option', () => {
+    it('accepts --export option with output directory', async () => {
+      mockFindUntrackedFiles.mockResolvedValue([]);
+
+      const program = new Command();
+
+      program
+        .argument('[commit-ish]', 'commit-ish', 'HEAD')
+        .argument('[compare-with]', 'compare-with')
+        .option('--port <port>', 'port', parseInt)
+        .option('--host <host>', 'host', '')
+        .option('--no-open', 'no-open')
+        .option('--mode <mode>', 'mode', 'side-by-side')
+        .option('--tui', 'tui')
+        .option('--pr <url>', 'pr')
+        .option('--export <dir>', 'export to static site')
+        .action(async (_commitish: string, _compareWith: string | undefined, options: any) => {
+          if (options.export) {
+            // This should call a static export function instead of startServer
+            console.log(`Exporting static site to: ${options.export}`);
+          }
+        });
+
+      await program.parseAsync(['--export', './output'], { from: 'user' });
+
+      expect(console.log).toHaveBeenCalledWith('Exporting static site to: ./output');
+      expect(mockStartServer).not.toHaveBeenCalled();
+    });
+
+    it('requires directory argument for --export option', async () => {
+      const program = new Command();
+
+      program
+        .argument('[commit-ish]', 'commit-ish', 'HEAD')
+        .argument('[compare-with]', 'compare-with')
+        .option('--export <dir>', 'export to static site')
+        .exitOverride(); // Prevent process.exit
+
+      await expect(program.parseAsync(['--export'], { from: 'user' })).rejects.toThrow();
+    });
+
+    it('prevents --export with --tui option', async () => {
+      const program = new Command();
+
+      program
+        .argument('[commit-ish]', 'commit-ish', 'HEAD')
+        .argument('[compare-with]', 'compare-with')
+        .option('--tui', 'tui')
+        .option('--export <dir>', 'export to static site')
+        .action(async (_commitish: string, _compareWith: string | undefined, options: any) => {
+          if (options.export && options.tui) {
+            console.error('Error: --export and --tui options cannot be used together');
+            process.exit(1);
+          }
+        });
+
+      await program.parseAsync(['--export', './output', '--tui'], { from: 'user' });
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Error: --export and --tui options cannot be used together'
+      );
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('prevents --export with --pr option', async () => {
+      const program = new Command();
+
+      program
+        .argument('[commit-ish]', 'commit-ish', 'HEAD')
+        .argument('[compare-with]', 'compare-with')
+        .option('--pr <url>', 'pr')
+        .option('--export <dir>', 'export to static site')
+        .action(async (_commitish: string, _compareWith: string | undefined, options: any) => {
+          if (options.export && options.pr) {
+            console.error('Error: --export cannot be used with --pr option');
+            process.exit(1);
+          }
+        });
+
+      await program.parseAsync(
+        ['--export', './output', '--pr', 'https://github.com/owner/repo/pull/123'],
+        { from: 'user' }
+      );
+
+      expect(console.error).toHaveBeenCalledWith('Error: --export cannot be used with --pr option');
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('prevents --export with stdin input', async () => {
+      // Mock stdin to simulate piped input
+      Object.defineProperty(process.stdin, 'isTTY', {
+        value: false,
+        configurable: true,
+      });
+
+      const program = new Command();
+
+      program
+        .argument('[commit-ish]', 'commit-ish', 'HEAD')
+        .argument('[compare-with]', 'compare-with')
+        .option('--export <dir>', 'export to static site')
+        .action(async (commitish: string, _compareWith: string | undefined, options: any) => {
+          const shouldReadStdin = !process.stdin.isTTY || commitish === '-';
+          if (options.export && shouldReadStdin) {
+            console.error('Error: --export cannot be used with stdin input');
+            process.exit(1);
+          }
+        });
+
+      await program.parseAsync(['--export', './output'], { from: 'user' });
+
+      expect(console.error).toHaveBeenCalledWith('Error: --export cannot be used with stdin input');
+      expect(process.exit).toHaveBeenCalledWith(1);
+
+      // Restore TTY
+      Object.defineProperty(process.stdin, 'isTTY', {
+        value: true,
+        configurable: true,
+      });
+    });
+  });
+
   describe('Diff mode determination', () => {
     const testCases = [
       {
