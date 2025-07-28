@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir, copyFile, readdir } from 'fs/promises';
-import { join, extname, basename } from 'path';
+import { join, extname, basename, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 import { GitDiffParser } from '../shared/git-parser.js';
 
@@ -80,9 +81,11 @@ async function copyClientAssets(outputDir: string): Promise<void> {
   const assetsDir = join(outputDir, 'assets');
   await mkdir(assetsDir, { recursive: true });
 
-  // In production, we would copy from dist/client
-  // For now, we'll create a placeholder
-  const clientDistDir = join(process.cwd(), 'dist', 'client', 'assets');
+  // Find the project root directory relative to this file
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const projectRoot = join(__dirname, '..', '..');
+  const clientDistDir = join(projectRoot, 'dist', 'client', 'assets');
 
   try {
     const files = await readdir(clientDistDir);
