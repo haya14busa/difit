@@ -122,13 +122,9 @@ function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile:
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>
   <link rel="stylesheet" href="./assets/${cssFile}">
-  <script>
-    // Set static mode flag
-    window.__STATIC_MODE__ = true;
-  </script>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root" data-static-mode="true"></div>
   <script type="module" src="./assets/${jsFile}"></script>
 </body>
 </html>`;

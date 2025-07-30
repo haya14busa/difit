@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { type DiffFile } from '../../types/diff';
+import { isStaticMode } from '../utils/staticMode';
 
 interface ImageInfo {
   width?: number;
@@ -71,7 +72,7 @@ export function ImageDiffChunk({
   // Checkerboard background style for transparent images
   // Helper to get image URL in static or server mode
   const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {
-    if (window.__STATIC_MODE__) {
+    if (isStaticMode()) {
       const baseName =
         path
           .split('/')

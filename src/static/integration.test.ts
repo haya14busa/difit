@@ -29,7 +29,7 @@ describe('Static Export Integration', () => {
     // Check that all files were created
     const indexHtml = await readFile(join(testOutputDir, 'index.html'), 'utf-8');
     expect(indexHtml).toContain('<!DOCTYPE html>');
-    expect(indexHtml).toContain('window.__STATIC_MODE__ = true');
+    expect(indexHtml).toContain('data-static-mode="true"');
     expect(indexHtml).not.toContain('window.__STATIC_DIFF_DATA__');
 
     // Check diff data
@@ -63,7 +63,7 @@ describe('Static Export Integration', () => {
     });
 
     const html = await readFile(join(testOutputDir, 'index.html'), 'utf-8');
-    expect(html).toContain('window.__STATIC_MODE__ = true');
+    expect(html).toContain('data-static-mode="true"');
     expect(html).not.toContain('window.__STATIC_DIFF_DATA__');
 
     // Check the separate JSON file

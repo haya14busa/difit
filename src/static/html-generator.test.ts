@@ -60,7 +60,7 @@ describe('HtmlGenerator', () => {
       await generateStaticHtml('./output');
 
       // Should set static mode flag
-      expect(capturedHtml).toContain('window.__STATIC_MODE__ = true');
+      expect(capturedHtml).toContain('data-static-mode="true"');
       // Should not embed diff data
       expect(capturedHtml).not.toContain('window.__STATIC_DIFF_DATA__');
     });
@@ -88,7 +88,7 @@ describe('HtmlGenerator', () => {
       // Should include client assets
       expect(capturedHtml).toContain('<script type="module" src="./assets/');
       expect(capturedHtml).toContain('<link rel="stylesheet" href="./assets/');
-      expect(capturedHtml).toContain('<div id="root"></div>');
+      expect(capturedHtml).toContain('<div id="root" data-static-mode="true"></div>');
     });
 
     it('should copy client assets to output directory', async () => {

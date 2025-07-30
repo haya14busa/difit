@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DiffMode, type ClientWatchState } from '../../types/watch.js';
+import { isStaticMode } from '../utils/staticMode';
 
 interface FileWatchHook {
   shouldReload: boolean;
@@ -39,7 +40,7 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
 
   const connectToWatch = useCallback(() => {
     // Disable in static mode
-    if (window.__STATIC_MODE__) {
+    if (isStaticMode()) {
       return;
     }
 

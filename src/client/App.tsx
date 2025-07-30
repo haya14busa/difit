@@ -22,6 +22,7 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { useViewedFiles } from './hooks/useViewedFiles';
 import { getFileElementId } from './utils/domUtils';
 import { findCommentPosition } from './utils/navigation/positionHelpers';
+import { isStaticMode } from './utils/staticMode';
 
 function App() {
   const [diffData, setDiffData] = useState<DiffResponse | null>(null);
@@ -183,7 +184,7 @@ function App() {
     try {
       let data: DiffResponse;
 
-      if (window.__STATIC_MODE__) {
+      if (isStaticMode()) {
         data = await fetchStaticDiffData();
       } else {
         // Normal server mode
@@ -243,7 +244,7 @@ function App() {
   // Send comments to server whenever they change and before page unload
   useEffect(() => {
     // Skip in static mode
-    if (window.__STATIC_MODE__) {
+    if (isStaticMode()) {
       return;
     }
 
@@ -278,7 +279,7 @@ function App() {
   // Establish SSE connection for tab close detection
   useEffect(() => {
     // Skip in static mode
-    if (window.__STATIC_MODE__) {
+    if (isStaticMode()) {
       return;
     }
 
