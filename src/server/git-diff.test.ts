@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { GitDiffParser } from './git-diff';
+import { GitDiffParser } from '../shared/git-parser';
 
 // Mock simple-git
 vi.mock('simple-git', () => ({

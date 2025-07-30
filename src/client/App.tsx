@@ -161,41 +161,45 @@ function App() {
   };
 
   const fetchDiffData = useCallback(async () => {
+    const fetchStaticDiffData = async (): Promise<DiffResponse> => {
+      const response = await fetch('./diff-data.json');
+      if (!response.ok) throw new Error('Failed to fetch static diff data');
+      const staticData = (await response.json()) as {
+        ignoreWhitespace: DiffResponse;
+        showWhitespace: DiffResponse;
+        mode: string;
+        baseCommitish: string;
+        targetCommitish: string;
+      };
+
+      // Set diff mode from static data
+      if (staticData.mode) {
+        setDiffMode(staticData.mode as 'side-by-side' | 'inline');
+      }
+
+      return ignoreWhitespace ? staticData.ignoreWhitespace : staticData.showWhitespace;
+    };
+
     try {
-      // Check if we're in static mode
+      let data: DiffResponse;
+
       if (window.__STATIC_MODE__) {
-        const response = await fetch('./diff-data.json');
-        if (!response.ok) throw new Error('Failed to fetch static diff data');
-        const staticData = (await response.json()) as {
-          ignoreWhitespace: DiffResponse;
-          showWhitespace: DiffResponse;
-          mode: string;
-          baseCommitish: string;
-          targetCommitish: string;
-        };
-        const data = ignoreWhitespace ? staticData.ignoreWhitespace : staticData.showWhitespace;
-        setDiffData(data);
-
-        // Set diff mode from static data
-        if (staticData.mode) {
-          setDiffMode(staticData.mode as 'side-by-side' | 'inline');
-        }
-
-        // Lock files are now automatically marked as viewed by useViewedFiles hook
+        data = await fetchStaticDiffData();
       } else {
         // Normal server mode
         const response = await fetch(`/api/diff?ignoreWhitespace=${ignoreWhitespace}`);
         if (!response.ok) throw new Error('Failed to fetch diff data');
-        const data = (await response.json()) as DiffResponse;
-        setDiffData(data);
+        data = (await response.json()) as DiffResponse;
 
         // Set diff mode from server response if provided
         if (data.mode) {
           setDiffMode(data.mode as 'side-by-side' | 'inline');
         }
-
-        // Lock files are now automatically marked as viewed by useViewedFiles hook
       }
+
+      setDiffData(data);
+
+      // Lock files are now automatically marked as viewed by useViewedFiles hook
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {

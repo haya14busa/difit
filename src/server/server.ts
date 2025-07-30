@@ -7,11 +7,11 @@ import open from 'open';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+import { GitDiffParser } from '../shared/git-parser.js';
 import { type DiffMode } from '../types/watch.js';
 import { getFileExtension } from '../utils/fileUtils.js';
 
 import { FileWatcherService } from './file-watcher.js';
-import { GitDiffParser } from './git-diff.js';
 
 import { type Comment, type DiffResponse } from '@/types/diff.js';
 
