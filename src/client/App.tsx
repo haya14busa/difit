@@ -163,7 +163,7 @@ function App() {
 
   const fetchDiffData = useCallback(async () => {
     const fetchStaticDiffData = async (): Promise<DiffResponse> => {
-      const response = await fetch('./diff-data.json');
+      const response = await fetch('/diff-data.json');
       if (!response.ok) throw new Error('Failed to fetch static diff data');
       const staticData = (await response.json()) as {
         ignoreWhitespace: DiffResponse;

@@ -96,6 +96,7 @@ const config: Linter.Config[] = [
       'public/**',
       'tests/**',
       'scripts/**',
+      'test-static/**',
       '*.config.js',
       '*.config.mjs',
       '*.config.ts',

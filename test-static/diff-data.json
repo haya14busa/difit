@@ -1,0 +1,1599 @@
+{
+  "ignoreWhitespace": {
+    "commit": "30b247b...b53f549",
+    "files": [
+      {
+        "path": "src/client/App.tsx",
+        "status": "modified",
+        "additions": 4,
+        "deletions": 3,
+        "chunks": [
+          {
+            "header": "@@ -21,6 +21,7 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';",
+            "oldStart": 21,
+            "oldLines": 6,
+            "newStart": 21,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useLocalComments } from './hooks/useLocalComments';",
+                "oldLineNumber": 21,
+                "newLineNumber": 21
+              },
+              {
+                "type": "normal",
+                "content": "import { getFileElementId } from './utils/domUtils';",
+                "oldLineNumber": 22,
+                "newLineNumber": 22
+              },
+              {
+                "type": "normal",
+                "content": "import { findCommentPosition } from './utils/navigation/positionHelpers';",
+                "oldLineNumber": 23,
+                "newLineNumber": 23
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from './utils/staticMode';",
+                "newLineNumber": 24
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 24, "newLineNumber": 25 },
+              {
+                "type": "normal",
+                "content": "function App() {",
+                "oldLineNumber": 25,
+                "newLineNumber": 26
+              },
+              {
+                "type": "normal",
+                "content": "  const [diffData, setDiffData] = useState<DiffResponse | null>(null);",
+                "oldLineNumber": 26,
+                "newLineNumber": 27
+              }
+            ]
+          },
+          {
+            "header": "@@ -175,7 +176,7 @@ function App() {",
+            "oldStart": 175,
+            "oldLines": 7,
+            "newStart": 176,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "    try {",
+                "oldLineNumber": 175,
+                "newLineNumber": 176
+              },
+              {
+                "type": "normal",
+                "content": "      let data: DiffResponse;",
+                "oldLineNumber": 176,
+                "newLineNumber": 177
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 177, "newLineNumber": 178 },
+              {
+                "type": "delete",
+                "content": "      if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 178
+              },
+              { "type": "add", "content": "      if (isStaticMode()) {", "newLineNumber": 179 },
+              {
+                "type": "normal",
+                "content": "        data = await fetchStaticDiffData();",
+                "oldLineNumber": 179,
+                "newLineNumber": 180
+              },
+              {
+                "type": "normal",
+                "content": "      } else {",
+                "oldLineNumber": 180,
+                "newLineNumber": 181
+              },
+              {
+                "type": "normal",
+                "content": "        // Normal server mode",
+                "oldLineNumber": 181,
+                "newLineNumber": 182
+              }
+            ]
+          },
+          {
+            "header": "@@ -242,7 +243,7 @@ function App() {",
+            "oldStart": 242,
+            "oldLines": 7,
+            "newStart": 243,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Send comments to server whenever they change and before page unload",
+                "oldLineNumber": 242,
+                "newLineNumber": 243
+              },
+              {
+                "type": "normal",
+                "content": "  useEffect(() => {",
+                "oldLineNumber": 243,
+                "newLineNumber": 244
+              },
+              {
+                "type": "normal",
+                "content": "    // Skip in static mode",
+                "oldLineNumber": 244,
+                "newLineNumber": 245
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 245
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 246 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 246,
+                "newLineNumber": 247
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 247, "newLineNumber": 248 },
+              { "type": "normal", "content": "", "oldLineNumber": 248, "newLineNumber": 249 }
+            ]
+          },
+          {
+            "header": "@@ -277,7 +278,7 @@ function App() {",
+            "oldStart": 277,
+            "oldLines": 7,
+            "newStart": 278,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Establish SSE connection for tab close detection",
+                "oldLineNumber": 277,
+                "newLineNumber": 278
+              },
+              {
+                "type": "normal",
+                "content": "  useEffect(() => {",
+                "oldLineNumber": 278,
+                "newLineNumber": 279
+              },
+              {
+                "type": "normal",
+                "content": "    // Skip in static mode",
+                "oldLineNumber": 279,
+                "newLineNumber": 280
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 280
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 281 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 281,
+                "newLineNumber": 282
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 282, "newLineNumber": 283 },
+              { "type": "normal", "content": "", "oldLineNumber": 283, "newLineNumber": 284 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/components/ImageDiffChunk.tsx",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,6 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 6,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useState } from 'react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "normal",
+                "content": "import { type DiffFile } from '../../types/diff';",
+                "oldLineNumber": 3,
+                "newLineNumber": 3
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 4
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 4, "newLineNumber": 5 },
+              {
+                "type": "normal",
+                "content": "interface ImageInfo {",
+                "oldLineNumber": 5,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  width?: number;",
+                "oldLineNumber": 6,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -71,7 +72,7 @@ export function ImageDiffChunk({",
+            "oldStart": 71,
+            "oldLines": 7,
+            "newStart": 72,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Checkerboard background style for transparent images",
+                "oldLineNumber": 71,
+                "newLineNumber": 72
+              },
+              {
+                "type": "normal",
+                "content": "  // Helper to get image URL in static or server mode",
+                "oldLineNumber": 72,
+                "newLineNumber": 73
+              },
+              {
+                "type": "normal",
+                "content": "  const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {",
+                "oldLineNumber": 73,
+                "newLineNumber": 74
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 74
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 75 },
+              {
+                "type": "normal",
+                "content": "      const baseName =",
+                "oldLineNumber": 75,
+                "newLineNumber": 76
+              },
+              {
+                "type": "normal",
+                "content": "        path",
+                "oldLineNumber": 76,
+                "newLineNumber": 77
+              },
+              {
+                "type": "normal",
+                "content": "          .split('/')",
+                "oldLineNumber": 77,
+                "newLineNumber": 78
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/components/ReloadButton.tsx",
+        "status": "modified",
+        "additions": 3,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,5 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 5,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { RefreshCw } from 'lucide-react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 3
+              },
+              { "type": "add", "content": "", "newLineNumber": 4 },
+              {
+                "type": "normal",
+                "content": "interface ReloadButtonProps {",
+                "oldLineNumber": 3,
+                "newLineNumber": 5
+              },
+              {
+                "type": "normal",
+                "content": "  shouldReload: boolean;",
+                "oldLineNumber": 4,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  isReloading: boolean;",
+                "oldLineNumber": 5,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -16,7 +18,7 @@ export function ReloadButton({",
+            "oldStart": 16,
+            "oldLines": 7,
+            "newStart": 18,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  className = '',",
+                "oldLineNumber": 16,
+                "newLineNumber": 18
+              },
+              {
+                "type": "normal",
+                "content": "}: ReloadButtonProps) {",
+                "oldLineNumber": 17,
+                "newLineNumber": 19
+              },
+              {
+                "type": "normal",
+                "content": "  // Disable in static mode",
+                "oldLineNumber": 18,
+                "newLineNumber": 20
+              },
+              {
+                "type": "delete",
+                "content": "  if (window.__STATIC_MODE__ || !shouldReload) {",
+                "oldLineNumber": 19
+              },
+              {
+                "type": "add",
+                "content": "  if (isStaticMode() || !shouldReload) {",
+                "newLineNumber": 21
+              },
+              {
+                "type": "normal",
+                "content": "    return null;",
+                "oldLineNumber": 20,
+                "newLineNumber": 22
+              },
+              { "type": "normal", "content": "  }", "oldLineNumber": 21, "newLineNumber": 23 },
+              { "type": "normal", "content": "", "oldLineNumber": 22, "newLineNumber": 24 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/hooks/useFileWatch.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,6 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 6,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useCallback, useEffect, useRef, useState } from 'react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "normal",
+                "content": "import { DiffMode, type ClientWatchState } from '../../types/watch.js';",
+                "oldLineNumber": 3,
+                "newLineNumber": 3
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 4
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 4, "newLineNumber": 5 },
+              {
+                "type": "normal",
+                "content": "interface FileWatchHook {",
+                "oldLineNumber": 5,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  shouldReload: boolean;",
+                "oldLineNumber": 6,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -39,7 +40,7 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {",
+            "oldStart": 39,
+            "oldLines": 7,
+            "newStart": 40,
+            "newLines": 7,
+            "lines": [
+              { "type": "normal", "content": "", "oldLineNumber": 39, "newLineNumber": 40 },
+              {
+                "type": "normal",
+                "content": "  const connectToWatch = useCallback(() => {",
+                "oldLineNumber": 40,
+                "newLineNumber": 41
+              },
+              {
+                "type": "normal",
+                "content": "    // Disable in static mode",
+                "oldLineNumber": 41,
+                "newLineNumber": 42
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 42
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 43 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 43,
+                "newLineNumber": 44
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 44, "newLineNumber": 45 },
+              { "type": "normal", "content": "", "oldLineNumber": 45, "newLineNumber": 46 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/utils/staticMode.ts",
+        "status": "added",
+        "additions": 7,
+        "deletions": 0,
+        "chunks": [
+          {
+            "header": "@@ -0,0 +1,7 @@",
+            "oldStart": 0,
+            "oldLines": 0,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              { "type": "add", "content": "/**", "newLineNumber": 1 },
+              {
+                "type": "add",
+                "content": " * Check if the application is running in static mode",
+                "newLineNumber": 2
+              },
+              {
+                "type": "add",
+                "content": " * In static mode, the app loads diff data from a JSON file instead of making API calls",
+                "newLineNumber": 3
+              },
+              { "type": "add", "content": " */", "newLineNumber": 4 },
+              {
+                "type": "add",
+                "content": "export function isStaticMode(): boolean {",
+                "newLineNumber": 5
+              },
+              {
+                "type": "add",
+                "content": "  return document.getElementById('root')?.dataset.staticMode === 'true';",
+                "newLineNumber": 6
+              },
+              { "type": "add", "content": "}", "newLineNumber": 7 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/html-generator.test.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "chunks": [
+          {
+            "header": "@@ -60,7 +60,7 @@ describe('HtmlGenerator', () => {",
+            "oldStart": 60,
+            "oldLines": 7,
+            "newStart": 60,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "      await generateStaticHtml('./output');",
+                "oldLineNumber": 60,
+                "newLineNumber": 60
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 61, "newLineNumber": 61 },
+              {
+                "type": "normal",
+                "content": "      // Should set static mode flag",
+                "oldLineNumber": 62,
+                "newLineNumber": 62
+              },
+              {
+                "type": "delete",
+                "content": "      expect(capturedHtml).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 63
+              },
+              {
+                "type": "add",
+                "content": "      expect(capturedHtml).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 63
+              },
+              {
+                "type": "normal",
+                "content": "      // Should not embed diff data",
+                "oldLineNumber": 64,
+                "newLineNumber": 64
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 65,
+                "newLineNumber": 65
+              },
+              { "type": "normal", "content": "    });", "oldLineNumber": 66, "newLineNumber": 66 }
+            ]
+          },
+          {
+            "header": "@@ -88,7 +88,7 @@ describe('HtmlGenerator', () => {",
+            "oldStart": 88,
+            "oldLines": 7,
+            "newStart": 88,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "      // Should include client assets",
+                "oldLineNumber": 88,
+                "newLineNumber": 88
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).toContain('<script type=\"module\" src=\"./assets/');",
+                "oldLineNumber": 89,
+                "newLineNumber": 89
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).toContain('<link rel=\"stylesheet\" href=\"./assets/');",
+                "oldLineNumber": 90,
+                "newLineNumber": 90
+              },
+              {
+                "type": "delete",
+                "content": "      expect(capturedHtml).toContain('<div id=\"root\"></div>');",
+                "oldLineNumber": 91
+              },
+              {
+                "type": "add",
+                "content": "      expect(capturedHtml).toContain('<div id=\"root\" data-static-mode=\"true\"></div>');",
+                "newLineNumber": 91
+              },
+              { "type": "normal", "content": "    });", "oldLineNumber": 92, "newLineNumber": 92 },
+              { "type": "normal", "content": "", "oldLineNumber": 93, "newLineNumber": 93 },
+              {
+                "type": "normal",
+                "content": "    it('should copy client assets to output directory', async () => {",
+                "oldLineNumber": 94,
+                "newLineNumber": 94
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/html-generator.ts",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 5,
+        "chunks": [
+          {
+            "header": "@@ -122,13 +122,9 @@ function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile:",
+            "oldStart": 122,
+            "oldLines": 13,
+            "newStart": 122,
+            "newLines": 9,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+                "oldLineNumber": 122,
+                "newLineNumber": 122
+              },
+              {
+                "type": "normal",
+                "content": "  <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>",
+                "oldLineNumber": 123,
+                "newLineNumber": 123
+              },
+              {
+                "type": "normal",
+                "content": "  <link rel=\"stylesheet\" href=\"./assets/${cssFile}\">",
+                "oldLineNumber": 124,
+                "newLineNumber": 124
+              },
+              { "type": "delete", "content": "  <script>", "oldLineNumber": 125 },
+              { "type": "delete", "content": "    // Set static mode flag", "oldLineNumber": 126 },
+              {
+                "type": "delete",
+                "content": "    window.__STATIC_MODE__ = true;",
+                "oldLineNumber": 127
+              },
+              { "type": "delete", "content": "  </script>", "oldLineNumber": 128 },
+              {
+                "type": "normal",
+                "content": "</head>",
+                "oldLineNumber": 129,
+                "newLineNumber": 125
+              },
+              { "type": "normal", "content": "<body>", "oldLineNumber": 130, "newLineNumber": 126 },
+              { "type": "delete", "content": "  <div id=\"root\"></div>", "oldLineNumber": 131 },
+              {
+                "type": "add",
+                "content": "  <div id=\"root\" data-static-mode=\"true\"></div>",
+                "newLineNumber": 127
+              },
+              {
+                "type": "normal",
+                "content": "  <script type=\"module\" src=\"./assets/${jsFile}\"></script>",
+                "oldLineNumber": 132,
+                "newLineNumber": 128
+              },
+              {
+                "type": "normal",
+                "content": "</body>",
+                "oldLineNumber": 133,
+                "newLineNumber": 129
+              },
+              {
+                "type": "normal",
+                "content": "</html>`;",
+                "oldLineNumber": 134,
+                "newLineNumber": 130
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/integration.test.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "chunks": [
+          {
+            "header": "@@ -29,7 +29,7 @@ describe('Static Export Integration', () => {",
+            "oldStart": 29,
+            "oldLines": 7,
+            "newStart": 29,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "    // Check that all files were created",
+                "oldLineNumber": 29,
+                "newLineNumber": 29
+              },
+              {
+                "type": "normal",
+                "content": "    const indexHtml = await readFile(join(testOutputDir, 'index.html'), 'utf-8');",
+                "oldLineNumber": 30,
+                "newLineNumber": 30
+              },
+              {
+                "type": "normal",
+                "content": "    expect(indexHtml).toContain('<!DOCTYPE html>');",
+                "oldLineNumber": 31,
+                "newLineNumber": 31
+              },
+              {
+                "type": "delete",
+                "content": "    expect(indexHtml).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 32
+              },
+              {
+                "type": "add",
+                "content": "    expect(indexHtml).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 32
+              },
+              {
+                "type": "normal",
+                "content": "    expect(indexHtml).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 33,
+                "newLineNumber": 33
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 34, "newLineNumber": 34 },
+              {
+                "type": "normal",
+                "content": "    // Check diff data",
+                "oldLineNumber": 35,
+                "newLineNumber": 35
+              }
+            ]
+          },
+          {
+            "header": "@@ -63,7 +63,7 @@ describe('Static Export Integration', () => {",
+            "oldStart": 63,
+            "oldLines": 7,
+            "newStart": 63,
+            "newLines": 7,
+            "lines": [
+              { "type": "normal", "content": "    });", "oldLineNumber": 63, "newLineNumber": 63 },
+              { "type": "normal", "content": "", "oldLineNumber": 64, "newLineNumber": 64 },
+              {
+                "type": "normal",
+                "content": "    const html = await readFile(join(testOutputDir, 'index.html'), 'utf-8');",
+                "oldLineNumber": 65,
+                "newLineNumber": 65
+              },
+              {
+                "type": "delete",
+                "content": "    expect(html).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 66
+              },
+              {
+                "type": "add",
+                "content": "    expect(html).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 66
+              },
+              {
+                "type": "normal",
+                "content": "    expect(html).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 67,
+                "newLineNumber": 67
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 68, "newLineNumber": 68 },
+              {
+                "type": "normal",
+                "content": "    // Check the separate JSON file",
+                "oldLineNumber": 69,
+                "newLineNumber": 69
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/types/global.d.ts",
+        "status": "modified",
+        "additions": 0,
+        "deletions": 6,
+        "chunks": [
+          {
+            "header": "@@ -1,7 +1 @@",
+            "oldStart": 1,
+            "oldLines": 7,
+            "newStart": 1,
+            "newLines": 1,
+            "lines": [
+              { "type": "delete", "content": "declare global {", "oldLineNumber": 1 },
+              { "type": "delete", "content": "  interface Window {", "oldLineNumber": 2 },
+              { "type": "delete", "content": "    __STATIC_MODE__?: boolean;", "oldLineNumber": 3 },
+              { "type": "delete", "content": "  }", "oldLineNumber": 4 },
+              { "type": "delete", "content": "}", "oldLineNumber": 5 },
+              { "type": "delete", "content": "", "oldLineNumber": 6 },
+              { "type": "normal", "content": "export {};", "oldLineNumber": 7, "newLineNumber": 1 }
+            ]
+          }
+        ]
+      }
+    ],
+    "isEmpty": false
+  },
+  "showWhitespace": {
+    "commit": "30b247b...b53f549",
+    "files": [
+      {
+        "path": "src/client/App.tsx",
+        "status": "modified",
+        "additions": 4,
+        "deletions": 3,
+        "chunks": [
+          {
+            "header": "@@ -21,6 +21,7 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';",
+            "oldStart": 21,
+            "oldLines": 6,
+            "newStart": 21,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useLocalComments } from './hooks/useLocalComments';",
+                "oldLineNumber": 21,
+                "newLineNumber": 21
+              },
+              {
+                "type": "normal",
+                "content": "import { getFileElementId } from './utils/domUtils';",
+                "oldLineNumber": 22,
+                "newLineNumber": 22
+              },
+              {
+                "type": "normal",
+                "content": "import { findCommentPosition } from './utils/navigation/positionHelpers';",
+                "oldLineNumber": 23,
+                "newLineNumber": 23
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from './utils/staticMode';",
+                "newLineNumber": 24
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 24, "newLineNumber": 25 },
+              {
+                "type": "normal",
+                "content": "function App() {",
+                "oldLineNumber": 25,
+                "newLineNumber": 26
+              },
+              {
+                "type": "normal",
+                "content": "  const [diffData, setDiffData] = useState<DiffResponse | null>(null);",
+                "oldLineNumber": 26,
+                "newLineNumber": 27
+              }
+            ]
+          },
+          {
+            "header": "@@ -175,7 +176,7 @@ function App() {",
+            "oldStart": 175,
+            "oldLines": 7,
+            "newStart": 176,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "    try {",
+                "oldLineNumber": 175,
+                "newLineNumber": 176
+              },
+              {
+                "type": "normal",
+                "content": "      let data: DiffResponse;",
+                "oldLineNumber": 176,
+                "newLineNumber": 177
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 177, "newLineNumber": 178 },
+              {
+                "type": "delete",
+                "content": "      if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 178
+              },
+              { "type": "add", "content": "      if (isStaticMode()) {", "newLineNumber": 179 },
+              {
+                "type": "normal",
+                "content": "        data = await fetchStaticDiffData();",
+                "oldLineNumber": 179,
+                "newLineNumber": 180
+              },
+              {
+                "type": "normal",
+                "content": "      } else {",
+                "oldLineNumber": 180,
+                "newLineNumber": 181
+              },
+              {
+                "type": "normal",
+                "content": "        // Normal server mode",
+                "oldLineNumber": 181,
+                "newLineNumber": 182
+              }
+            ]
+          },
+          {
+            "header": "@@ -242,7 +243,7 @@ function App() {",
+            "oldStart": 242,
+            "oldLines": 7,
+            "newStart": 243,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Send comments to server whenever they change and before page unload",
+                "oldLineNumber": 242,
+                "newLineNumber": 243
+              },
+              {
+                "type": "normal",
+                "content": "  useEffect(() => {",
+                "oldLineNumber": 243,
+                "newLineNumber": 244
+              },
+              {
+                "type": "normal",
+                "content": "    // Skip in static mode",
+                "oldLineNumber": 244,
+                "newLineNumber": 245
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 245
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 246 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 246,
+                "newLineNumber": 247
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 247, "newLineNumber": 248 },
+              { "type": "normal", "content": "", "oldLineNumber": 248, "newLineNumber": 249 }
+            ]
+          },
+          {
+            "header": "@@ -277,7 +278,7 @@ function App() {",
+            "oldStart": 277,
+            "oldLines": 7,
+            "newStart": 278,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Establish SSE connection for tab close detection",
+                "oldLineNumber": 277,
+                "newLineNumber": 278
+              },
+              {
+                "type": "normal",
+                "content": "  useEffect(() => {",
+                "oldLineNumber": 278,
+                "newLineNumber": 279
+              },
+              {
+                "type": "normal",
+                "content": "    // Skip in static mode",
+                "oldLineNumber": 279,
+                "newLineNumber": 280
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 280
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 281 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 281,
+                "newLineNumber": 282
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 282, "newLineNumber": 283 },
+              { "type": "normal", "content": "", "oldLineNumber": 283, "newLineNumber": 284 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/components/ImageDiffChunk.tsx",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,6 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 6,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useState } from 'react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "normal",
+                "content": "import { type DiffFile } from '../../types/diff';",
+                "oldLineNumber": 3,
+                "newLineNumber": 3
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 4
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 4, "newLineNumber": 5 },
+              {
+                "type": "normal",
+                "content": "interface ImageInfo {",
+                "oldLineNumber": 5,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  width?: number;",
+                "oldLineNumber": 6,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -71,7 +72,7 @@ export function ImageDiffChunk({",
+            "oldStart": 71,
+            "oldLines": 7,
+            "newStart": 72,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  // Checkerboard background style for transparent images",
+                "oldLineNumber": 71,
+                "newLineNumber": 72
+              },
+              {
+                "type": "normal",
+                "content": "  // Helper to get image URL in static or server mode",
+                "oldLineNumber": 72,
+                "newLineNumber": 73
+              },
+              {
+                "type": "normal",
+                "content": "  const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {",
+                "oldLineNumber": 73,
+                "newLineNumber": 74
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 74
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 75 },
+              {
+                "type": "normal",
+                "content": "      const baseName =",
+                "oldLineNumber": 75,
+                "newLineNumber": 76
+              },
+              {
+                "type": "normal",
+                "content": "        path",
+                "oldLineNumber": 76,
+                "newLineNumber": 77
+              },
+              {
+                "type": "normal",
+                "content": "          .split('/')",
+                "oldLineNumber": 77,
+                "newLineNumber": 78
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/components/ReloadButton.tsx",
+        "status": "modified",
+        "additions": 3,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,5 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 5,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { RefreshCw } from 'lucide-react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 3
+              },
+              { "type": "add", "content": "", "newLineNumber": 4 },
+              {
+                "type": "normal",
+                "content": "interface ReloadButtonProps {",
+                "oldLineNumber": 3,
+                "newLineNumber": 5
+              },
+              {
+                "type": "normal",
+                "content": "  shouldReload: boolean;",
+                "oldLineNumber": 4,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  isReloading: boolean;",
+                "oldLineNumber": 5,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -16,7 +18,7 @@ export function ReloadButton({",
+            "oldStart": 16,
+            "oldLines": 7,
+            "newStart": 18,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  className = '',",
+                "oldLineNumber": 16,
+                "newLineNumber": 18
+              },
+              {
+                "type": "normal",
+                "content": "}: ReloadButtonProps) {",
+                "oldLineNumber": 17,
+                "newLineNumber": 19
+              },
+              {
+                "type": "normal",
+                "content": "  // Disable in static mode",
+                "oldLineNumber": 18,
+                "newLineNumber": 20
+              },
+              {
+                "type": "delete",
+                "content": "  if (window.__STATIC_MODE__ || !shouldReload) {",
+                "oldLineNumber": 19
+              },
+              {
+                "type": "add",
+                "content": "  if (isStaticMode() || !shouldReload) {",
+                "newLineNumber": 21
+              },
+              {
+                "type": "normal",
+                "content": "    return null;",
+                "oldLineNumber": 20,
+                "newLineNumber": 22
+              },
+              { "type": "normal", "content": "  }", "oldLineNumber": 21, "newLineNumber": 23 },
+              { "type": "normal", "content": "", "oldLineNumber": 22, "newLineNumber": 24 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/hooks/useFileWatch.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 1,
+        "chunks": [
+          {
+            "header": "@@ -1,6 +1,7 @@",
+            "oldStart": 1,
+            "oldLines": 6,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "import { useCallback, useEffect, useRef, useState } from 'react';",
+                "oldLineNumber": 1,
+                "newLineNumber": 1
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 2, "newLineNumber": 2 },
+              {
+                "type": "normal",
+                "content": "import { DiffMode, type ClientWatchState } from '../../types/watch.js';",
+                "oldLineNumber": 3,
+                "newLineNumber": 3
+              },
+              {
+                "type": "add",
+                "content": "import { isStaticMode } from '../utils/staticMode';",
+                "newLineNumber": 4
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 4, "newLineNumber": 5 },
+              {
+                "type": "normal",
+                "content": "interface FileWatchHook {",
+                "oldLineNumber": 5,
+                "newLineNumber": 6
+              },
+              {
+                "type": "normal",
+                "content": "  shouldReload: boolean;",
+                "oldLineNumber": 6,
+                "newLineNumber": 7
+              }
+            ]
+          },
+          {
+            "header": "@@ -39,7 +40,7 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {",
+            "oldStart": 39,
+            "oldLines": 7,
+            "newStart": 40,
+            "newLines": 7,
+            "lines": [
+              { "type": "normal", "content": "", "oldLineNumber": 39, "newLineNumber": 40 },
+              {
+                "type": "normal",
+                "content": "  const connectToWatch = useCallback(() => {",
+                "oldLineNumber": 40,
+                "newLineNumber": 41
+              },
+              {
+                "type": "normal",
+                "content": "    // Disable in static mode",
+                "oldLineNumber": 41,
+                "newLineNumber": 42
+              },
+              {
+                "type": "delete",
+                "content": "    if (window.__STATIC_MODE__) {",
+                "oldLineNumber": 42
+              },
+              { "type": "add", "content": "    if (isStaticMode()) {", "newLineNumber": 43 },
+              {
+                "type": "normal",
+                "content": "      return;",
+                "oldLineNumber": 43,
+                "newLineNumber": 44
+              },
+              { "type": "normal", "content": "    }", "oldLineNumber": 44, "newLineNumber": 45 },
+              { "type": "normal", "content": "", "oldLineNumber": 45, "newLineNumber": 46 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/client/utils/staticMode.ts",
+        "status": "added",
+        "additions": 7,
+        "deletions": 0,
+        "chunks": [
+          {
+            "header": "@@ -0,0 +1,7 @@",
+            "oldStart": 0,
+            "oldLines": 0,
+            "newStart": 1,
+            "newLines": 7,
+            "lines": [
+              { "type": "add", "content": "/**", "newLineNumber": 1 },
+              {
+                "type": "add",
+                "content": " * Check if the application is running in static mode",
+                "newLineNumber": 2
+              },
+              {
+                "type": "add",
+                "content": " * In static mode, the app loads diff data from a JSON file instead of making API calls",
+                "newLineNumber": 3
+              },
+              { "type": "add", "content": " */", "newLineNumber": 4 },
+              {
+                "type": "add",
+                "content": "export function isStaticMode(): boolean {",
+                "newLineNumber": 5
+              },
+              {
+                "type": "add",
+                "content": "  return document.getElementById('root')?.dataset.staticMode === 'true';",
+                "newLineNumber": 6
+              },
+              { "type": "add", "content": "}", "newLineNumber": 7 }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/html-generator.test.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "chunks": [
+          {
+            "header": "@@ -60,7 +60,7 @@ describe('HtmlGenerator', () => {",
+            "oldStart": 60,
+            "oldLines": 7,
+            "newStart": 60,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "      await generateStaticHtml('./output');",
+                "oldLineNumber": 60,
+                "newLineNumber": 60
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 61, "newLineNumber": 61 },
+              {
+                "type": "normal",
+                "content": "      // Should set static mode flag",
+                "oldLineNumber": 62,
+                "newLineNumber": 62
+              },
+              {
+                "type": "delete",
+                "content": "      expect(capturedHtml).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 63
+              },
+              {
+                "type": "add",
+                "content": "      expect(capturedHtml).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 63
+              },
+              {
+                "type": "normal",
+                "content": "      // Should not embed diff data",
+                "oldLineNumber": 64,
+                "newLineNumber": 64
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 65,
+                "newLineNumber": 65
+              },
+              { "type": "normal", "content": "    });", "oldLineNumber": 66, "newLineNumber": 66 }
+            ]
+          },
+          {
+            "header": "@@ -88,7 +88,7 @@ describe('HtmlGenerator', () => {",
+            "oldStart": 88,
+            "oldLines": 7,
+            "newStart": 88,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "      // Should include client assets",
+                "oldLineNumber": 88,
+                "newLineNumber": 88
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).toContain('<script type=\"module\" src=\"./assets/');",
+                "oldLineNumber": 89,
+                "newLineNumber": 89
+              },
+              {
+                "type": "normal",
+                "content": "      expect(capturedHtml).toContain('<link rel=\"stylesheet\" href=\"./assets/');",
+                "oldLineNumber": 90,
+                "newLineNumber": 90
+              },
+              {
+                "type": "delete",
+                "content": "      expect(capturedHtml).toContain('<div id=\"root\"></div>');",
+                "oldLineNumber": 91
+              },
+              {
+                "type": "add",
+                "content": "      expect(capturedHtml).toContain('<div id=\"root\" data-static-mode=\"true\"></div>');",
+                "newLineNumber": 91
+              },
+              { "type": "normal", "content": "    });", "oldLineNumber": 92, "newLineNumber": 92 },
+              { "type": "normal", "content": "", "oldLineNumber": 93, "newLineNumber": 93 },
+              {
+                "type": "normal",
+                "content": "    it('should copy client assets to output directory', async () => {",
+                "oldLineNumber": 94,
+                "newLineNumber": 94
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/html-generator.ts",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 5,
+        "chunks": [
+          {
+            "header": "@@ -122,13 +122,9 @@ function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile:",
+            "oldStart": 122,
+            "oldLines": 13,
+            "newStart": 122,
+            "newLines": 9,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+                "oldLineNumber": 122,
+                "newLineNumber": 122
+              },
+              {
+                "type": "normal",
+                "content": "  <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>",
+                "oldLineNumber": 123,
+                "newLineNumber": 123
+              },
+              {
+                "type": "normal",
+                "content": "  <link rel=\"stylesheet\" href=\"./assets/${cssFile}\">",
+                "oldLineNumber": 124,
+                "newLineNumber": 124
+              },
+              { "type": "delete", "content": "  <script>", "oldLineNumber": 125 },
+              { "type": "delete", "content": "    // Set static mode flag", "oldLineNumber": 126 },
+              {
+                "type": "delete",
+                "content": "    window.__STATIC_MODE__ = true;",
+                "oldLineNumber": 127
+              },
+              { "type": "delete", "content": "  </script>", "oldLineNumber": 128 },
+              {
+                "type": "normal",
+                "content": "</head>",
+                "oldLineNumber": 129,
+                "newLineNumber": 125
+              },
+              { "type": "normal", "content": "<body>", "oldLineNumber": 130, "newLineNumber": 126 },
+              { "type": "delete", "content": "  <div id=\"root\"></div>", "oldLineNumber": 131 },
+              {
+                "type": "add",
+                "content": "  <div id=\"root\" data-static-mode=\"true\"></div>",
+                "newLineNumber": 127
+              },
+              {
+                "type": "normal",
+                "content": "  <script type=\"module\" src=\"./assets/${jsFile}\"></script>",
+                "oldLineNumber": 132,
+                "newLineNumber": 128
+              },
+              {
+                "type": "normal",
+                "content": "</body>",
+                "oldLineNumber": 133,
+                "newLineNumber": 129
+              },
+              {
+                "type": "normal",
+                "content": "</html>`;",
+                "oldLineNumber": 134,
+                "newLineNumber": 130
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/static/integration.test.ts",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "chunks": [
+          {
+            "header": "@@ -29,7 +29,7 @@ describe('Static Export Integration', () => {",
+            "oldStart": 29,
+            "oldLines": 7,
+            "newStart": 29,
+            "newLines": 7,
+            "lines": [
+              {
+                "type": "normal",
+                "content": "    // Check that all files were created",
+                "oldLineNumber": 29,
+                "newLineNumber": 29
+              },
+              {
+                "type": "normal",
+                "content": "    const indexHtml = await readFile(join(testOutputDir, 'index.html'), 'utf-8');",
+                "oldLineNumber": 30,
+                "newLineNumber": 30
+              },
+              {
+                "type": "normal",
+                "content": "    expect(indexHtml).toContain('<!DOCTYPE html>');",
+                "oldLineNumber": 31,
+                "newLineNumber": 31
+              },
+              {
+                "type": "delete",
+                "content": "    expect(indexHtml).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 32
+              },
+              {
+                "type": "add",
+                "content": "    expect(indexHtml).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 32
+              },
+              {
+                "type": "normal",
+                "content": "    expect(indexHtml).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 33,
+                "newLineNumber": 33
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 34, "newLineNumber": 34 },
+              {
+                "type": "normal",
+                "content": "    // Check diff data",
+                "oldLineNumber": 35,
+                "newLineNumber": 35
+              }
+            ]
+          },
+          {
+            "header": "@@ -63,7 +63,7 @@ describe('Static Export Integration', () => {",
+            "oldStart": 63,
+            "oldLines": 7,
+            "newStart": 63,
+            "newLines": 7,
+            "lines": [
+              { "type": "normal", "content": "    });", "oldLineNumber": 63, "newLineNumber": 63 },
+              { "type": "normal", "content": "", "oldLineNumber": 64, "newLineNumber": 64 },
+              {
+                "type": "normal",
+                "content": "    const html = await readFile(join(testOutputDir, 'index.html'), 'utf-8');",
+                "oldLineNumber": 65,
+                "newLineNumber": 65
+              },
+              {
+                "type": "delete",
+                "content": "    expect(html).toContain('window.__STATIC_MODE__ = true');",
+                "oldLineNumber": 66
+              },
+              {
+                "type": "add",
+                "content": "    expect(html).toContain('data-static-mode=\"true\"');",
+                "newLineNumber": 66
+              },
+              {
+                "type": "normal",
+                "content": "    expect(html).not.toContain('window.__STATIC_DIFF_DATA__');",
+                "oldLineNumber": 67,
+                "newLineNumber": 67
+              },
+              { "type": "normal", "content": "", "oldLineNumber": 68, "newLineNumber": 68 },
+              {
+                "type": "normal",
+                "content": "    // Check the separate JSON file",
+                "oldLineNumber": 69,
+                "newLineNumber": 69
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "src/types/global.d.ts",
+        "status": "modified",
+        "additions": 0,
+        "deletions": 6,
+        "chunks": [
+          {
+            "header": "@@ -1,7 +1 @@",
+            "oldStart": 1,
+            "oldLines": 7,
+            "newStart": 1,
+            "newLines": 1,
+            "lines": [
+              { "type": "delete", "content": "declare global {", "oldLineNumber": 1 },
+              { "type": "delete", "content": "  interface Window {", "oldLineNumber": 2 },
+              { "type": "delete", "content": "    __STATIC_MODE__?: boolean;", "oldLineNumber": 3 },
+              { "type": "delete", "content": "  }", "oldLineNumber": 4 },
+              { "type": "delete", "content": "}", "oldLineNumber": 5 },
+              { "type": "delete", "content": "", "oldLineNumber": 6 },
+              { "type": "normal", "content": "export {};", "oldLineNumber": 7, "newLineNumber": 1 }
+            ]
+          }
+        ]
+      }
+    ],
+    "isEmpty": false
+  },
+  "mode": "side-by-side",
+  "baseCommitish": "HEAD^",
+  "targetCommitish": "HEAD"
+}
