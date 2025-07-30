@@ -43,7 +43,6 @@ temp/
 
 # Test output
 test-output/
-test-export/
 
 # kiro
 .kiro
