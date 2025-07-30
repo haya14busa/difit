@@ -81,7 +81,7 @@ program
   .action(async (commitish: string, compareWith: string | undefined, options: CliOptions) => {
     try {
       // Check if we should read from stdin (only when - is explicitly passed)
-      const shouldReadStdin = commitish === '-';
+      const shouldReadStdin = commitish === '-' && !process.stdin.isTTY;
 
       // Validate --export conflicts
       if (options.export) {
@@ -97,6 +97,13 @@ program
           console.error('Error: --export cannot be used with stdin input');
           process.exit(1);
         }
+      }
+
+      // Handle stdin requested but no data piped
+      if (commitish === '-' && process.stdin.isTTY) {
+        console.error('Error: Expected stdin input but no data was piped');
+        console.error('Usage: git diff | difit -');
+        process.exit(1);
       }
 
       if (shouldReadStdin) {
