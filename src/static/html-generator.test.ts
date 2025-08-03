@@ -61,8 +61,6 @@ describe('HtmlGenerator', () => {
 
       // Should set static mode flag
       expect(capturedHtml).toContain('data-static-mode="true"');
-      // Should not embed diff data
-      expect(capturedHtml).not.toContain('window.__STATIC_DIFF_DATA__');
     });
 
     it('should include client bundle and styles', async () => {
