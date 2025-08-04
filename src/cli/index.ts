@@ -93,10 +93,6 @@ program
           console.error('Error: --export cannot be used with --pr option');
           process.exit(1);
         }
-        if (shouldReadStdin) {
-          console.error('Error: --export cannot be used with stdin input');
-          process.exit(1);
-        }
       }
 
       // Handle stdin requested but no data piped
@@ -112,6 +108,17 @@ program
         if (!diffContent.trim()) {
           console.error('Error: No diff content received from stdin');
           process.exit(1);
+        }
+
+        if (options.export) {
+          // Handle static export from stdin
+          const { exportStaticSiteFromStdin } = await import('../static/export.js');
+          await exportStaticSiteFromStdin(options.export, {
+            diffContent,
+            mode: options.mode,
+          });
+          console.log(`✅ Static site exported to: ${options.export}`);
+          return;
         }
 
         // Start server with stdin diff

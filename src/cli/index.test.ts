@@ -1279,5 +1279,34 @@ describe('CLI index.ts', () => {
         })
       );
     });
+
+    it('should support stdin input with --export', async () => {
+      const mockExportStaticSiteFromStdin = vi.fn();
+      vi.doMock('../static/export.js', () => ({
+        exportStaticSiteFromStdin: mockExportStaticSiteFromStdin,
+      }));
+
+      const program = new Command();
+      program
+        .arguments('<commitish> [compareWith]')
+        .option('--export <dir>', 'export diff as a static site')
+        .action(async (commitish: string, _compareWith: string | undefined, options: any) => {
+          if (commitish === '-') {
+            const diffContent = 'mock diff content';
+            const { exportStaticSiteFromStdin } = await import('../static/export.js');
+            await exportStaticSiteFromStdin(options.export, {
+              diffContent,
+              mode: 'side-by-side',
+            });
+          }
+        });
+
+      await program.parseAsync(['-', '--export', 'output'], { from: 'user' });
+
+      expect(mockExportStaticSiteFromStdin).toHaveBeenCalledWith('output', {
+        diffContent: 'mock diff content',
+        mode: 'side-by-side',
+      });
+    });
   });
 });

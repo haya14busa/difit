@@ -33,6 +33,11 @@ export async function generateStaticHtml(outputDir: string): Promise<void> {
 }
 
 async function extractBinaryFiles(outputDir: string, diffData: StaticDiffData): Promise<void> {
+  // Skip image extraction for stdin diffs
+  if (diffData.baseCommitish === 'stdin' || diffData.targetCommitish === 'stdin') {
+    return;
+  }
+
   const imagesDir = join(outputDir, 'images');
   await mkdir(imagesDir, { recursive: true });
 

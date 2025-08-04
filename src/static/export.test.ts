@@ -4,11 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Create mock functions
 const mockParseDiff = vi.fn();
+const mockParseStdinDiff = vi.fn();
 
 // Mock modules before imports
 vi.mock('../shared/git-parser.js', () => ({
   GitDiffParser: vi.fn(() => ({
     parseDiff: mockParseDiff,
+    parseStdinDiff: mockParseStdinDiff,
   })),
 }));
 
@@ -24,6 +26,7 @@ describe('exportStaticSite', () => {
     vi.clearAllMocks();
     vi.resetModules();
     mockParseDiff.mockClear();
+    mockParseStdinDiff.mockClear();
   });
 
   describe('static data generation', () => {
@@ -161,6 +164,105 @@ describe('exportStaticSite', () => {
           mode: 'side-by-side',
           baseCommitish: 'HEAD^',
           targetCommitish: 'HEAD',
+        }),
+        'utf-8'
+      );
+    });
+  });
+
+  describe('exportStaticSiteFromStdin', () => {
+    it('should export static site from stdin diff', async () => {
+      const diffContent = `diff --git a/test.js b/test.js
+index 1234567..abcdefg 100644
+--- a/test.js
++++ b/test.js
+@@ -1,3 +1,3 @@
+ function hello() {
+-  console.log('hello');
++  console.log('hello world');
+ }`;
+
+      const mockStdinDiffData = {
+        commit: 'stdin diff',
+        files: [
+          {
+            path: 'test.js',
+            additions: 1,
+            deletions: 1,
+            chunks: [],
+          },
+        ],
+        isEmpty: false,
+      };
+
+      mockParseStdinDiff.mockReturnValue(mockStdinDiffData);
+
+      const fs = await import('fs/promises');
+      vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const { exportStaticSiteFromStdin } = await import('./export.js');
+      await exportStaticSiteFromStdin('./test-output', {
+        diffContent,
+        mode: 'inline',
+      });
+
+      // Check JSON file was written with correct data
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        join('./test-output', 'diff-data.json'),
+        JSON.stringify({
+          ignoreWhitespace: mockStdinDiffData,
+          showWhitespace: mockStdinDiffData,
+          mode: 'inline',
+          baseCommitish: 'stdin',
+          targetCommitish: 'stdin',
+        }),
+        'utf-8'
+      );
+
+      // Check parseStdinDiff was called with correct content
+      expect(mockParseStdinDiff).toHaveBeenCalledWith(diffContent);
+    });
+
+    it('should handle stdin diff with image files', async () => {
+      const diffContent = `diff --git a/image.png b/image.png
+index 1234567..abcdefg 100644
+Binary files a/image.png and b/image.png differ`;
+
+      const mockStdinDiffData = {
+        commit: 'stdin diff',
+        files: [
+          {
+            path: 'image.png',
+            additions: 0,
+            deletions: 0,
+            chunks: [],
+          },
+        ],
+        isEmpty: false,
+      };
+
+      mockParseStdinDiff.mockReturnValue(mockStdinDiffData);
+
+      const fs = await import('fs/promises');
+      vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const { exportStaticSiteFromStdin } = await import('./export.js');
+      await exportStaticSiteFromStdin('./test-output', {
+        diffContent,
+        mode: 'side-by-side',
+      });
+
+      // Verify that the static data was written correctly
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        join('./test-output', 'diff-data.json'),
+        JSON.stringify({
+          ignoreWhitespace: mockStdinDiffData,
+          showWhitespace: mockStdinDiffData,
+          mode: 'side-by-side',
+          baseCommitish: 'stdin',
+          targetCommitish: 'stdin',
         }),
         'utf-8'
       );

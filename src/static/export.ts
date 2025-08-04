@@ -12,6 +12,11 @@ export interface ExportOptions {
   mode: string;
 }
 
+export interface ExportStdinOptions {
+  diffContent: string;
+  mode: string;
+}
+
 export interface StaticDiffData {
   ignoreWhitespace: DiffResponse;
   showWhitespace: DiffResponse;
@@ -53,5 +58,37 @@ export async function exportStaticSite(outputDir: string, options: ExportOptions
   await writeFile(join(outputDir, 'diff-data.json'), JSON.stringify(staticData), 'utf-8');
 
   // Generate static HTML
+  await generateStaticHtml(outputDir);
+}
+
+export async function exportStaticSiteFromStdin(
+  outputDir: string,
+  options: ExportStdinOptions
+): Promise<void> {
+  // Create output directory
+  await mkdir(outputDir, { recursive: true });
+
+  // Create parser instance
+  const parser = new GitDiffParser();
+
+  // Parse stdin diff
+  const diffData = parser.parseStdinDiff(options.diffContent);
+
+  // Prepare static data
+  // For stdin, we use the same diff data for both whitespace modes
+  // since we can't regenerate it with different options
+  const staticData: StaticDiffData = {
+    ignoreWhitespace: diffData,
+    showWhitespace: diffData,
+    mode: options.mode,
+    baseCommitish: 'stdin',
+    targetCommitish: 'stdin',
+  };
+
+  // Write diff data as JSON
+  await writeFile(join(outputDir, 'diff-data.json'), JSON.stringify(staticData), 'utf-8');
+
+  // Generate static HTML
+  // Note: Image extraction is skipped for stdin diffs
   await generateStaticHtml(outputDir);
 }
