@@ -21,14 +21,11 @@ export async function generateStaticHtml(outputDir: string): Promise<void> {
   // Extract binary files
   await extractBinaryFiles(outputDir, diffData);
 
-  // Copy client assets
-  await copyClientAssets(outputDir);
+  // Copy client assets and get the copied file names
+  const { jsFile, cssFile } = await copyClientAssets(outputDir);
 
   // Copy favicon
   await copyFavicon(outputDir);
-
-  // Find actual asset file names
-  const { jsFile, cssFile } = await findAssetFiles(join(outputDir, 'assets'));
 
   // Generate HTML with correct asset references
   const html = generateHtmlTemplate(diffData, jsFile, cssFile);
@@ -80,7 +77,7 @@ async function extractBinaryFiles(outputDir: string, diffData: StaticDiffData): 
   }
 }
 
-async function copyClientAssets(outputDir: string): Promise<void> {
+async function copyClientAssets(outputDir: string): Promise<{ jsFile: string; cssFile: string }> {
   const assetsDir = join(outputDir, 'assets');
   await mkdir(assetsDir, { recursive: true });
 
@@ -90,16 +87,28 @@ async function copyClientAssets(outputDir: string): Promise<void> {
   const projectRoot = join(__dirname, '..', '..');
   const clientDistDir = join(projectRoot, 'dist', 'client', 'assets');
 
+  let jsFile = 'index.js';
+  let cssFile = 'index.css';
+
   try {
     const files = await readdir(clientDistDir);
     for (const file of files) {
       if (typeof file === 'string') {
         await copyFile(join(clientDistDir, file), join(assetsDir, file));
+
+        // Track JS and CSS files
+        if (file.startsWith('index-') && file.endsWith('.js')) {
+          jsFile = file;
+        } else if (file.startsWith('index-') && file.endsWith('.css')) {
+          cssFile = file;
+        }
       }
     }
   } catch (error) {
     console.warn('Client assets not found. Run build first.', error);
   }
+
+  return { jsFile, cssFile };
 }
 
 async function copyFavicon(outputDir: string): Promise<void> {
@@ -112,21 +121,6 @@ async function copyFavicon(outputDir: string): Promise<void> {
     await copyFile(faviconPath, join(outputDir, 'favicon.svg'));
   } catch (error) {
     console.warn('Favicon not found. Skipping favicon copy.', error);
-  }
-}
-
-async function findAssetFiles(assetsDir: string): Promise<{ jsFile: string; cssFile: string }> {
-  try {
-    const files = await readdir(assetsDir);
-    const jsFile =
-      files.find((f) => typeof f === 'string' && f.startsWith('index-') && f.endsWith('.js')) ||
-      'index.js';
-    const cssFile =
-      files.find((f) => typeof f === 'string' && f.startsWith('index-') && f.endsWith('.css')) ||
-      'index.css';
-    return { jsFile, cssFile };
-  } catch {
-    return { jsFile: 'index.js', cssFile: 'index.css' };
   }
 }
 
