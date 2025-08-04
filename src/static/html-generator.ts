@@ -24,6 +24,9 @@ export async function generateStaticHtml(outputDir: string): Promise<void> {
   // Copy client assets
   await copyClientAssets(outputDir);
 
+  // Copy favicon
+  await copyFavicon(outputDir);
+
   // Find actual asset file names
   const { jsFile, cssFile } = await findAssetFiles(join(outputDir, 'assets'));
 
@@ -99,6 +102,19 @@ async function copyClientAssets(outputDir: string): Promise<void> {
   }
 }
 
+async function copyFavicon(outputDir: string): Promise<void> {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const projectRoot = join(__dirname, '..', '..');
+  const faviconPath = join(projectRoot, 'public', 'favicon.svg');
+
+  try {
+    await copyFile(faviconPath, join(outputDir, 'favicon.svg'));
+  } catch (error) {
+    console.warn('Favicon not found. Skipping favicon copy.', error);
+  }
+}
+
 async function findAssetFiles(assetsDir: string): Promise<{ jsFile: string; cssFile: string }> {
   try {
     const files = await readdir(assetsDir);
@@ -121,6 +137,7 @@ function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./assets/${cssFile}">
 </head>
 <body>
