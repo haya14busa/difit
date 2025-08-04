@@ -21,7 +21,6 @@ interface UseDiffSourceResult {
   canSyncComments: boolean;
   canWatchFiles: boolean;
   canFetchBlobs: boolean;
-  persistenceMode: 'server' | 'local' | 'none';
 }
 
 export function useDiffSource(options: UseDiffSourceOptions = {}): UseDiffSourceResult {
@@ -138,6 +137,5 @@ export function useDiffSource(options: UseDiffSourceOptions = {}): UseDiffSource
     canSyncComments: strategy?.capabilities.canSyncComments ?? false,
     canWatchFiles: strategy?.capabilities.canWatchFiles ?? false,
     canFetchBlobs: strategy?.capabilities.canFetchBlobs ?? false,
-    persistenceMode: strategy?.capabilities.persistenceMode ?? 'none',
   };
 }

@@ -9,7 +9,6 @@ export class ServerApiStrategy implements DiffSourceStrategy {
     canWatchFiles: true,
     canStreamUpdates: true,
     canFetchBlobs: true,
-    persistenceMode: 'server',
     requiresAuth: false,
   };
 

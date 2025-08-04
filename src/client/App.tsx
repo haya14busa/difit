@@ -38,7 +38,6 @@ function App() {
 
   const { settings, updateSettings } = useAppearanceSettings();
 
-  // Use the new diff source strategy
   const {
     diffData,
     loading,
@@ -48,7 +47,6 @@ function App() {
     syncComments: syncCommentsToSource,
     canSyncComments,
     canWatchFiles,
-    persistenceMode,
   } = useDiffSource({
     ignoreWhitespace,
   });
@@ -104,14 +102,12 @@ function App() {
     }
   };
 
-  // State to trigger comment creation from keyboard
   const [commentTrigger, setCommentTrigger] = useState<{
     fileIndex: number;
     chunkIndex: number;
     lineIndex: number;
   } | null>(null);
 
-  // File watch for reload functionality - updated to work with strategy
   const { shouldReload, reload, watchState } = useFileWatch(
     async () => {
       await refetch();
@@ -228,7 +224,7 @@ function App() {
 
     // Also handle page unload
     const sendCommentsBeforeUnload = () => {
-      if (comments.length > 0 && persistenceMode === 'server') {
+      if (comments.length > 0 && canSyncComments) {
         // Use sendBeacon for reliable delivery during page unload
         const data = JSON.stringify({ comments });
         navigator.sendBeacon('/api/comments', data);
@@ -240,7 +236,7 @@ function App() {
     return () => {
       window.removeEventListener('beforeunload', sendCommentsBeforeUnload);
     };
-  }, [comments, canSyncComments, syncCommentsToSource, persistenceMode]);
+  }, [comments, canSyncComments, syncCommentsToSource]);
 
   const handleAddComment = (
     file: string,

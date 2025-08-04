@@ -17,7 +17,6 @@ export class LocalFileStrategy implements DiffSourceStrategy {
     canWatchFiles: false,
     canStreamUpdates: false,
     canFetchBlobs: true,
-    persistenceMode: 'local',
     requiresAuth: false,
   };
 

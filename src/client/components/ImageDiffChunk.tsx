@@ -71,10 +71,7 @@ export function ImageDiffChunk({
     return `W: ${info.width}px | H: ${info.height}px`;
   };
 
-  // Checkerboard background style for transparent images
-  // Helper to get image URL based on strategy
   const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {
-    // Use strategy to determine if we're in local mode
     if (strategy?.name === 'local-file') {
       const baseName =
         path
@@ -87,6 +84,7 @@ export function ImageDiffChunk({
     return `/api/blob/${path}?ref=${ref}`;
   };
 
+  // Checkerboard background style for transparent images
   const checkerboardStyle = {
     backgroundImage: `
       linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%),

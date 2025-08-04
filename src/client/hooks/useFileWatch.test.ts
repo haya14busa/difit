@@ -19,7 +19,6 @@ class MockStrategy implements DiffSourceStrategy {
     canWatchFiles: true,
     canStreamUpdates: false,
     canFetchBlobs: false,
-    persistenceMode: 'none',
     requiresAuth: false,
   };
 
@@ -118,7 +117,6 @@ describe('useFileWatch', () => {
           canWatchFiles: false,
           canStreamUpdates: false,
           canFetchBlobs: false,
-          persistenceMode: 'none',
           requiresAuth: false,
         },
         async fetchDiff(_options: FetchOptions): Promise<DiffResponse> {

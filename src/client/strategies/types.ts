@@ -5,7 +5,6 @@ export interface DiffSourceCapabilities {
   readonly canWatchFiles: boolean;
   readonly canStreamUpdates: boolean;
   readonly canFetchBlobs: boolean;
-  readonly persistenceMode: 'server' | 'local' | 'none';
   readonly requiresAuth: boolean;
   readonly maxFileSize?: number;
 }
