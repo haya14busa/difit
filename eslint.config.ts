@@ -91,6 +91,8 @@ const config: Linter.Config[] = [
   {
     ignores: [
       'dist/**',
+      'dist-static/**',
+      'dist-github-spa/**',
       'build/**',
       'node_modules/**',
       'public/**',

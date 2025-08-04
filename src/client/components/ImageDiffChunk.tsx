@@ -81,6 +81,16 @@ export function ImageDiffChunk({
       const ext = path.split('.').pop() || '';
       return `./images/${baseName}_${version}.${ext}`;
     }
+
+    if (strategy?.name === 'github-pr') {
+      // For GitHub PR mode, extract owner/repo from URL and use raw GitHub URLs
+      const urlMatch = window.location.pathname.match(/^\/([^/]+)\/([^/]+)\/pull\/\d+/);
+      if (urlMatch) {
+        const [, owner, repo] = urlMatch;
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}`;
+      }
+    }
+
     return `/api/blob/${path}?ref=${ref}`;
   };
 

@@ -463,17 +463,27 @@ function App() {
                 </div>
               </div>
               <span>
-                Reviewing:{' '}
-                <code className="bg-github-bg-tertiary px-1.5 py-0.5 rounded text-xs text-github-text-primary">
-                  {diffData.commit.includes('...') ?
-                    <>
-                      <span className="text-github-text-secondary font-medium">
-                        {diffData.commit.split('...')[0]}...
-                      </span>
-                      <span className="font-medium">{diffData.commit.split('...')[1]}</span>
-                    </>
-                  : diffData.commit}
-                </code>
+                {strategy?.name === 'github-pr' ?
+                  <>
+                    GitHub PR:{' '}
+                    <code className="bg-github-bg-tertiary px-1.5 py-0.5 rounded text-xs text-github-text-primary">
+                      {window.location.pathname}
+                    </code>
+                  </>
+                : <>
+                    Reviewing:{' '}
+                    <code className="bg-github-bg-tertiary px-1.5 py-0.5 rounded text-xs text-github-text-primary">
+                      {diffData.commit.includes('...') ?
+                        <>
+                          <span className="text-github-text-secondary font-medium">
+                            {diffData.commit.split('...')[0]}...
+                          </span>
+                          <span className="font-medium">{diffData.commit.split('...')[1]}</span>
+                        </>
+                      : diffData.commit}
+                    </code>
+                  </>
+                }
               </span>
               <span>
                 {diffData.files.length} file

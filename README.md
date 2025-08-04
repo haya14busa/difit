@@ -167,6 +167,61 @@ pnpm run typecheck
 - **Development mode**: Uses Vite's dev server for hot reload and fast development
 - **Production mode**: Serves built static files (used by npx and production builds)
 
+## 🌐 GitHub PR SPA Mode
+
+difit can be deployed as a static SPA (Single Page Application) to view GitHub PRs directly in the browser without any backend server.
+
+### Building the GitHub PR SPA
+
+```bash
+npm run build:github-spa
+```
+
+This creates a static build in `dist-github-spa/` that can be deployed to any static hosting service.
+
+### Deployment
+
+1. **GitHub Pages**:
+
+   ```bash
+   # Deploy the dist-github-spa folder to GitHub Pages
+   ```
+
+2. **Netlify/Vercel**:
+   - Simply deploy the `dist-github-spa` folder
+   - Ensure the hosting service is configured to serve `index.html` for all routes
+
+3. **Custom Static Server**:
+   - Serve the contents of `dist-github-spa`
+   - Configure server to return `index.html` for all 404s (for client-side routing)
+
+### Usage
+
+Once deployed, access GitHub PRs directly:
+
+```
+https://your-host.com/<owner>/<repo>/pull/<pr-number>
+```
+
+For example:
+
+```
+https://your-host.com/facebook/react/pull/12345
+```
+
+### Current Limitations
+
+- Works with public repositories only (no authentication yet)
+- Subject to GitHub API rate limits (60 requests/hour for unauthenticated requests)
+- No comment persistence (comments are stored in browser localStorage)
+
+### Planned Features
+
+- GitHub OAuth with PKCE flow for authentication
+- Secure token storage using Web Crypto API + IndexedDB
+- Higher API rate limits with authentication
+- Comment syncing across devices
+
 ## 🏗️ Architecture
 
 - **CLI**: Commander.js for argument parsing with comprehensive validation
