@@ -13,6 +13,7 @@ import { useState } from 'react';
 
 import { type DiffFile, type Comment, type LineNumber } from '../../types/diff';
 import { type CursorPosition } from '../hooks/keyboardNavigation';
+import type { DiffSourceStrategy } from '../strategies/types';
 import { isImageFile } from '../utils/imageUtils';
 
 import { DiffChunk } from './DiffChunk';
@@ -49,6 +50,7 @@ interface DiffViewerProps {
   ) => void;
   commentTrigger?: { fileIndex: number; chunkIndex: number; lineIndex: number } | null;
   onCommentTriggerHandled?: () => void;
+  strategy?: DiffSourceStrategy | null;
 }
 
 export function DiffViewer({
@@ -67,6 +69,7 @@ export function DiffViewer({
   cursor = null,
   fileIndex = 0,
   onLineClick,
+  strategy,
   commentTrigger,
   onCommentTriggerHandled,
 }: DiffViewerProps) {
@@ -182,6 +185,7 @@ export function DiffViewer({
               mode={diffMode}
               baseCommitish={baseCommitish}
               targetCommitish={targetCommitish}
+              strategy={strategy}
             />
           : file.chunks.map((chunk, index) => {
               return (

@@ -1,7 +1,7 @@
 import { Columns, AlignLeft, Settings, PanelLeftClose, PanelLeft, Keyboard } from 'lucide-react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { type DiffResponse, type LineNumber, type Comment } from '../types/diff';
+import { type LineNumber, type Comment } from '../types/diff';
 
 import { Checkbox } from './components/Checkbox';
 import { CommentsDropdown } from './components/CommentsDropdown';
@@ -17,19 +17,16 @@ import { SparkleAnimation } from './components/SparkleAnimation';
 import { WordHighlightProvider } from './contexts/WordHighlightContext';
 import { useAppearanceSettings } from './hooks/useAppearanceSettings';
 import { useDiffComments } from './hooks/useDiffComments';
+import { useDiffSource } from './hooks/useDiffSource';
 import { useFileWatch } from './hooks/useFileWatch';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { useViewedFiles } from './hooks/useViewedFiles';
 import { getFileElementId } from './utils/domUtils';
 import { findCommentPosition } from './utils/navigation/positionHelpers';
-import { isStaticMode } from './utils/staticMode';
 
 function App() {
-  const [diffData, setDiffData] = useState<DiffResponse | null>(null);
   const [diffMode, setDiffMode] = useState<'side-by-side' | 'inline'>('side-by-side');
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isCopiedAll, setIsCopiedAll] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(320); // 320px default width
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -40,6 +37,28 @@ function App() {
   const [isCommentsListOpen, setIsCommentsListOpen] = useState(false);
 
   const { settings, updateSettings } = useAppearanceSettings();
+
+  // Use the new diff source strategy
+  const {
+    diffData,
+    loading,
+    error,
+    strategy,
+    refetch,
+    syncComments: syncCommentsToSource,
+    canSyncComments,
+    canWatchFiles,
+    persistenceMode,
+  } = useDiffSource({
+    ignoreWhitespace,
+  });
+
+  // Update diff mode from server response
+  useEffect(() => {
+    if (diffData?.mode) {
+      setDiffMode(diffData.mode as 'side-by-side' | 'inline');
+    }
+  }, [diffData]);
 
   // New diff-aware comment system
   const {
@@ -92,10 +111,13 @@ function App() {
     lineIndex: number;
   } | null>(null);
 
-  // File watch for reload functionality - initialize with callback
-  const { shouldReload, reload, watchState } = useFileWatch(async () => {
-    await fetchDiffData();
-  });
+  // File watch for reload functionality - updated to work with strategy
+  const { shouldReload, reload, watchState } = useFileWatch(
+    async () => {
+      await refetch();
+    },
+    canWatchFiles ? strategy : null
+  );
 
   const { cursor, isHelpOpen, setIsHelpOpen, setCursorPosition } = useKeyboardNavigation({
     files: diffData?.files || [],
@@ -161,57 +183,6 @@ function App() {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  const fetchDiffData = useCallback(async () => {
-    const fetchStaticDiffData = async (): Promise<DiffResponse> => {
-      const response = await fetch('/diff-data.json');
-      if (!response.ok) throw new Error('Failed to fetch static diff data');
-      const staticData = (await response.json()) as {
-        ignoreWhitespace: DiffResponse;
-        showWhitespace: DiffResponse;
-        mode: string;
-        baseCommitish: string;
-        targetCommitish: string;
-      };
-
-      // Set diff mode from static data
-      if (staticData.mode) {
-        setDiffMode(staticData.mode as 'side-by-side' | 'inline');
-      }
-
-      return ignoreWhitespace ? staticData.ignoreWhitespace : staticData.showWhitespace;
-    };
-
-    try {
-      let data: DiffResponse;
-
-      if (isStaticMode()) {
-        data = await fetchStaticDiffData();
-      } else {
-        // Normal server mode
-        const response = await fetch(`/api/diff?ignoreWhitespace=${ignoreWhitespace}`);
-        if (!response.ok) throw new Error('Failed to fetch diff data');
-        data = (await response.json()) as DiffResponse;
-
-        // Set diff mode from server response if provided
-        if (data.mode) {
-          setDiffMode(data.mode as 'side-by-side' | 'inline');
-        }
-      }
-
-      setDiffData(data);
-
-      // Lock files are now automatically marked as viewed by useViewedFiles hook
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  }, [ignoreWhitespace]);
-
-  useEffect(() => {
-    void fetchDiffData();
-  }, [fetchDiffData]);
-
   // Clear comments on initial load if requested via CLI flag
   const hasCleanedRef = useRef(false);
   useEffect(() => {
@@ -243,26 +214,21 @@ function App() {
 
   // Send comments to server whenever they change and before page unload
   useEffect(() => {
-    // Skip in static mode
-    if (isStaticMode()) {
+    // Only sync if strategy supports it
+    if (!canSyncComments) {
       return;
     }
 
     // Sync comments whenever they change
     if (comments.length > 0) {
-      const data = JSON.stringify({ comments });
-      fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: data,
-      }).catch((error) => {
+      syncCommentsToSource(comments).catch((error) => {
         console.error('Failed to sync comments:', error);
       });
     }
 
     // Also handle page unload
     const sendCommentsBeforeUnload = () => {
-      if (comments.length > 0) {
+      if (comments.length > 0 && persistenceMode === 'server') {
         // Use sendBeacon for reliable delivery during page unload
         const data = JSON.stringify({ comments });
         navigator.sendBeacon('/api/comments', data);
@@ -274,31 +240,7 @@ function App() {
     return () => {
       window.removeEventListener('beforeunload', sendCommentsBeforeUnload);
     };
-  }, [comments]);
-
-  // Establish SSE connection for tab close detection
-  useEffect(() => {
-    // Skip in static mode
-    if (isStaticMode()) {
-      return;
-    }
-
-    const eventSource = new EventSource('/api/heartbeat');
-
-    eventSource.onopen = () => {
-      console.log('Connected to server heartbeat');
-    };
-
-    eventSource.onerror = () => {
-      console.log('Server connection lost');
-      eventSource.close();
-    };
-
-    // Cleanup on unmount
-    return () => {
-      eventSource.close();
-    };
-  }, []);
+  }, [comments, canSyncComments, syncCommentsToSource, persistenceMode]);
 
   const handleAddComment = (
     file: string,
@@ -474,13 +416,15 @@ function App() {
                 label="Ignore Whitespace"
                 title={ignoreWhitespace ? 'Show whitespace changes' : 'Ignore whitespace changes'}
               />
-              {/* File Watch Reload Button */}
-              <ReloadButton
-                shouldReload={shouldReload}
-                isReloading={watchState.isReloading}
-                onReload={reload}
-                changeType={watchState.lastChangeType}
-              />
+              {/* File Watch Reload Button - conditionally rendered based on capability */}
+              {canWatchFiles && (
+                <ReloadButton
+                  shouldReload={shouldReload}
+                  isReloading={watchState.isReloading}
+                  onReload={reload}
+                  changeType={watchState.lastChangeType}
+                />
+              )}
             </div>
             <div className="flex items-center gap-4 text-sm text-github-text-secondary">
               {comments.length > 0 && (
@@ -658,6 +602,7 @@ function App() {
                     }}
                     commentTrigger={commentTrigger?.fileIndex === fileIndex ? commentTrigger : null}
                     onCommentTriggerHandled={() => setCommentTrigger(null)}
+                    strategy={strategy}
                   />
                 </div>
               );

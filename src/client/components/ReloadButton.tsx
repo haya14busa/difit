@@ -1,7 +1,5 @@
 import { RefreshCw } from 'lucide-react';
 
-import { isStaticMode } from '../utils/staticMode';
-
 interface ReloadButtonProps {
   shouldReload: boolean;
   isReloading: boolean;
@@ -17,8 +15,8 @@ export function ReloadButton({
   changeType,
   className = '',
 }: ReloadButtonProps) {
-  // Disable in static mode
-  if (isStaticMode() || !shouldReload) {
+  // Don't show button if there's nothing to reload
+  if (!shouldReload) {
     return null;
   }
 

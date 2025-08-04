@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DiffMode, type ClientWatchState } from '../../types/watch.js';
-import { isStaticMode } from '../utils/staticMode';
+import type { DiffSourceStrategy } from '../strategies/types';
 
 interface FileWatchHook {
   shouldReload: boolean;
@@ -11,20 +11,13 @@ interface FileWatchHook {
   watchState: ClientWatchState;
 }
 
-interface WatchEvent {
-  type: 'reload' | 'error' | 'connected';
-  diffMode: DiffMode;
-  changeType: 'file' | 'commit' | 'staging';
-  timestamp: string;
-  message?: string;
-}
-
-export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
+export function useFileWatch(
+  onReload?: () => Promise<void>,
+  strategy?: DiffSourceStrategy | null
+): FileWatchHook {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000; // 3 seconds
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const [watchState, setWatchState] = useState<ClientWatchState>({
     isWatchEnabled: false,
@@ -39,102 +32,42 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
   const [error, setError] = useState<string | null>(null);
 
   const connectToWatch = useCallback(() => {
-    // Disable in static mode
-    if (isStaticMode()) {
+    // Check if strategy supports file watching
+    if (!strategy?.capabilities.canWatchFiles || !strategy.watchFiles) {
+      setWatchState((prev) => ({
+        ...prev,
+        isWatchEnabled: false,
+        connectionStatus: 'disconnected',
+      }));
       return;
     }
 
-    if (eventSourceRef.current) {
-      return; // Already connected
-    }
-
     try {
-      const eventSource = new EventSource('/api/watch');
-      eventSourceRef.current = eventSource;
-
-      eventSource.onopen = () => {
-        console.log('Connected to file watch service');
+      // Use strategy's watchFiles method
+      const cleanup = strategy.watchFiles(() => {
+        console.log('File changes detected, showing reload button');
         setWatchState((prev) => ({
           ...prev,
-          connectionStatus: 'connected',
+          shouldReload: true,
+          lastChangeTime: new Date(),
+          lastChangeType: 'file',
         }));
-        reconnectAttemptsRef.current = 0;
-        setError(null);
-      };
+      });
 
-      eventSource.onmessage = (event) => {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const data: WatchEvent = JSON.parse(event.data as string);
+      cleanupRef.current = cleanup;
+      setError(null);
 
-          switch (data.type) {
-            case 'connected':
-              setWatchState((prev) => ({
-                ...prev,
-                isWatchEnabled: true,
-                diffMode: data.diffMode,
-                connectionStatus: 'connected',
-              }));
-              break;
-
-            case 'reload':
-              console.log('File changes detected, showing reload button:', data.changeType);
-              setWatchState((prev) => ({
-                ...prev,
-                shouldReload: true,
-                lastChangeTime: new Date(),
-                lastChangeType: data.changeType,
-              }));
-              break;
-
-            case 'error':
-              console.error('File watch error:', data.message);
-              setError(data.message || 'File watch error occurred');
-              break;
-          }
-        } catch (parseError) {
-          console.error('Error parsing watch event:', parseError);
-        }
-      };
-
-      eventSource.onerror = () => {
-        console.log('File watch connection lost');
-        setWatchState((prev) => ({
-          ...prev,
-          connectionStatus: 'disconnected',
-        }));
-
-        // Close the current connection
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close();
-          eventSourceRef.current = null;
-        }
-
-        // Attempt to reconnect
-        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-          setWatchState((prev) => ({
-            ...prev,
-            connectionStatus: 'reconnecting',
-          }));
-
-          reconnectAttemptsRef.current += 1;
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(
-              `Attempting to reconnect to file watch service (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`
-            );
-            connectToWatch();
-          }, reconnectDelay);
-        } else {
-          console.error('Max reconnection attempts reached');
-          setError('Lost connection to file watch service');
-        }
-      };
+      // Set connected state immediately after successful setup
+      setWatchState((prev) => ({
+        ...prev,
+        isWatchEnabled: true,
+        connectionStatus: 'connected',
+      }));
     } catch (connectionError) {
-      console.error('Failed to connect to file watch service:', connectionError);
-      setError('Failed to connect to file watch service');
+      console.error('Failed to setup file watch:', connectionError);
+      setError('Failed to setup file watch');
     }
-  }, [maxReconnectAttempts, reconnectDelay]);
+  }, [strategy]);
 
   const handleReload = useCallback(async () => {
     if (watchState.isReloading) {
@@ -171,6 +104,11 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
   }, [onReload, watchState.isReloading]);
 
   const cleanup = () => {
+    if (cleanupRef.current) {
+      cleanupRef.current();
+      cleanupRef.current = null;
+    }
+
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
@@ -182,7 +120,7 @@ export function useFileWatch(onReload?: () => Promise<void>): FileWatchHook {
     }
   };
 
-  // Initialize connection
+  // Initialize connection when strategy changes
   useEffect(() => {
     connectToWatch();
 

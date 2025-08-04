@@ -1,63 +1,63 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { DiffResponse } from '../../types/diff';
 import { DiffMode } from '../../types/watch.js';
+import type { DiffSourceStrategy, DiffSourceCapabilities, FetchOptions } from '../strategies/types';
 
 import { useFileWatch } from './useFileWatch.js';
 
-// Mock EventSource
-class MockEventSource {
-  public onopen: ((event: Event) => void) | null = null;
-  public onmessage: ((event: MessageEvent) => void) | null = null;
-  public onerror: ((event: Event) => void) | null = null;
-  public readyState: number = 0;
-  public close = vi.fn();
+// Mock console methods
+vi.spyOn(console, 'log').mockImplementation(() => {});
+const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  constructor(public url: string) {
-    // Store instance for access in tests
-    MockEventSource.instances.push(this);
+// Create a mock strategy
+class MockStrategy implements DiffSourceStrategy {
+  name = 'mock';
+  capabilities: DiffSourceCapabilities = {
+    canSyncComments: false,
+    canWatchFiles: true,
+    canStreamUpdates: false,
+    canFetchBlobs: false,
+    persistenceMode: 'none',
+    requiresAuth: false,
+  };
 
-    // Simulate connection after a short delay
-    setTimeout(() => {
-      this.readyState = 1; // OPEN
-      if (this.onopen) {
-        this.onopen(new Event('open'));
-      }
-    }, 10);
+  watchFilesCallback: (() => void) | null = null;
+  watchFilesMock = vi.fn((callback: () => void) => {
+    this.watchFilesCallback = callback;
+    return () => {
+      this.watchFilesCallback = null;
+    };
+  });
+
+  watchFiles = this.watchFilesMock;
+
+  async fetchDiff(_options: FetchOptions): Promise<DiffResponse> {
+    // Return a mock diff response
+    return {
+      files: [],
+      commit: 'mock-commit',
+      isEmpty: false,
+      mode: 'side-by-side',
+      baseCommitish: 'base',
+      targetCommitish: 'target',
+    };
   }
 
-  dispatchMessage(data: string) {
-    if (this.onmessage) {
-      this.onmessage(new MessageEvent('message', { data }));
+  triggerFileChange() {
+    if (this.watchFilesCallback) {
+      this.watchFilesCallback();
     }
-  }
-
-  dispatchError() {
-    if (this.onerror) {
-      this.onerror(new Event('error'));
-    }
-  }
-
-  static instances: MockEventSource[] = [];
-  static clearInstances() {
-    MockEventSource.instances = [];
   }
 }
 
-// Mock EventSource globally
-vi.stubGlobal('EventSource', MockEventSource);
-
-// Mock console methods
-vi.stubGlobal('console', {
-  log: vi.fn(),
-  error: vi.fn(),
-});
-
 describe('useFileWatch', () => {
+  let mockStrategy: MockStrategy;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.clearAllTimers();
-    MockEventSource.clearInstances();
+    mockStrategy = new MockStrategy();
   });
 
   describe('initial state', () => {
@@ -79,138 +79,75 @@ describe('useFileWatch', () => {
     });
   });
 
-  describe('SSE connection', () => {
-    it('should establish connection on mount', async () => {
-      const { result } = renderHook(() => useFileWatch());
+  describe('with strategy', () => {
+    it('should setup file watching when strategy supports it', async () => {
+      const { result } = renderHook(() => useFileWatch(undefined, mockStrategy));
 
       await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
+        expect(mockStrategy.watchFilesMock).toHaveBeenCalledWith(expect.any(Function));
       });
 
+      expect(result.current.watchState.isWatchEnabled).toBe(true);
       expect(result.current.watchState.connectionStatus).toBe('connected');
     });
 
-    it('should handle connection events', async () => {
-      const { result } = renderHook(() => useFileWatch());
+    it('should handle file change events', async () => {
+      const { result } = renderHook(() => useFileWatch(undefined, mockStrategy));
 
       await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
+        expect(mockStrategy.watchFilesMock).toHaveBeenCalled();
       });
-
-      // Get the EventSource instance and dispatch a connected event
-      const eventSource = MockEventSource.instances[0]!;
 
       act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'connected',
-            diffMode: DiffMode.WORKING,
-            changeType: 'file',
-            timestamp: new Date().toISOString(),
-            message: 'Connected to file watcher',
-          })
-        );
-      });
-
-      await waitFor(() => {
-        expect(result.current.watchState.isWatchEnabled).toBe(true);
-        expect(result.current.watchState.diffMode).toBe(DiffMode.WORKING);
-      });
-    });
-
-    it('should handle reload events', async () => {
-      const { result } = renderHook(() => useFileWatch());
-
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      const eventSource = MockEventSource.instances[0]!;
-
-      act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'reload',
-            diffMode: DiffMode.DOT,
-            changeType: 'commit',
-            timestamp: new Date().toISOString(),
-          })
-        );
+        mockStrategy.triggerFileChange();
       });
 
       await waitFor(() => {
         expect(result.current.shouldReload).toBe(true);
         expect(result.current.watchState.shouldReload).toBe(true);
-        expect(result.current.watchState.lastChangeType).toBe('commit');
+        expect(result.current.watchState.lastChangeType).toBe('file');
+        expect(result.current.watchState.lastChangeTime).toBeInstanceOf(Date);
       });
     });
 
-    it('should handle error events', async () => {
-      const { result } = renderHook(() => useFileWatch());
+    it('should not setup watching when strategy does not support it', () => {
+      const noWatchStrategy: DiffSourceStrategy = {
+        name: 'no-watch',
+        capabilities: {
+          canSyncComments: false,
+          canWatchFiles: false,
+          canStreamUpdates: false,
+          canFetchBlobs: false,
+          persistenceMode: 'none',
+          requiresAuth: false,
+        },
+        async fetchDiff(_options: FetchOptions): Promise<DiffResponse> {
+          return {
+            files: [],
+            commit: 'mock-commit',
+            isEmpty: false,
+            mode: 'side-by-side',
+            baseCommitish: 'base',
+            targetCommitish: 'target',
+          };
+        },
+      };
 
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
+      const { result } = renderHook(() => useFileWatch(undefined, noWatchStrategy));
 
-      const eventSource = MockEventSource.instances[0]!;
-
-      act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'error',
-            diffMode: DiffMode.DEFAULT,
-            changeType: 'file',
-            timestamp: new Date().toISOString(),
-            message: 'Watch error occurred',
-          })
-        );
-      });
-
-      await waitFor(() => {
-        expect(result.current.error).toBe('Watch error occurred');
-      });
-    });
-
-    it('should handle malformed messages gracefully', async () => {
-      const { result } = renderHook(() => useFileWatch());
-
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      const eventSource = MockEventSource.instances[0]!;
-
-      act(() => {
-        eventSource.dispatchMessage('invalid json');
-      });
-
-      // Should not throw or crash
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
+      expect(result.current.watchState.isWatchEnabled).toBe(false);
+      expect(result.current.watchState.connectionStatus).toBe('disconnected');
     });
   });
 
   describe('reload functionality', () => {
     it('should call onReload callback when reload is triggered', async () => {
-      const mockOnReload = vi.fn().mockResolvedValue(undefined);
-      const { result } = renderHook(() => useFileWatch(mockOnReload));
+      const onReloadMock = vi.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() => useFileWatch(onReloadMock, mockStrategy));
 
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      // Set shouldReload state first
-      const eventSource = MockEventSource.instances[0]!;
+      // Trigger a file change to enable reload
       act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'reload',
-            diffMode: DiffMode.DEFAULT,
-            changeType: 'file',
-            timestamp: new Date().toISOString(),
-          })
-        );
+        mockStrategy.triggerFileChange();
       });
 
       await waitFor(() => {
@@ -218,41 +155,23 @@ describe('useFileWatch', () => {
       });
 
       // Trigger reload
-      act(() => {
-        result.current.reload();
+      await act(async () => {
+        await result.current.reload();
       });
 
-      await waitFor(() => {
-        expect(mockOnReload).toHaveBeenCalled();
-        expect(result.current.watchState.isReloading).toBe(true);
-      });
-
-      // Wait for reload to complete
-      await waitFor(() => {
-        expect(result.current.watchState.isReloading).toBe(false);
-        expect(result.current.shouldReload).toBe(false);
-      });
+      expect(onReloadMock).toHaveBeenCalled();
+      expect(result.current.shouldReload).toBe(false);
+      expect(result.current.watchState.shouldReload).toBe(false);
+      expect(result.current.watchState.isReloading).toBe(false);
     });
 
     it('should handle reload errors', async () => {
-      const mockOnReload = vi.fn().mockRejectedValue(new Error('Reload failed'));
-      const { result } = renderHook(() => useFileWatch(mockOnReload));
+      const onReloadMock = vi.fn().mockRejectedValue(new Error('Reload failed'));
+      const { result } = renderHook(() => useFileWatch(onReloadMock, mockStrategy));
 
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      // Set shouldReload state first
-      const eventSource = MockEventSource.instances[0]!;
+      // Trigger a file change to enable reload
       act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'reload',
-            diffMode: DiffMode.DEFAULT,
-            changeType: 'file',
-            timestamp: new Date().toISOString(),
-          })
-        );
+        mockStrategy.triggerFileChange();
       });
 
       await waitFor(() => {
@@ -260,128 +179,109 @@ describe('useFileWatch', () => {
       });
 
       // Trigger reload
-      act(() => {
-        result.current.reload();
+      await act(async () => {
+        await result.current.reload();
       });
 
-      await waitFor(() => {
-        expect(result.current.error).toBe('Failed to reload diff data');
-        expect(result.current.watchState.isReloading).toBe(false);
-      });
+      expect(onReloadMock).toHaveBeenCalled();
+      expect(result.current.error).toBe('Failed to reload diff data');
+      expect(result.current.watchState.isReloading).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Reload failed:', expect.any(Error));
     });
 
     it('should not reload if already reloading', async () => {
-      const mockOnReload = vi
-        .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
-      const { result } = renderHook(() => useFileWatch(mockOnReload));
-
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      // Set shouldReload state first
-      const eventSource = MockEventSource.instances[0]!;
-      act(() => {
-        eventSource.dispatchMessage(
-          JSON.stringify({
-            type: 'reload',
-            diffMode: DiffMode.DEFAULT,
-            changeType: 'file',
-            timestamp: new Date().toISOString(),
+      let resolveReload: (() => void) | null = null;
+      const onReloadMock = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveReload = resolve;
           })
-        );
+      );
+      const { result } = renderHook(() => useFileWatch(onReloadMock, mockStrategy));
+
+      // Trigger a file change to enable reload
+      act(() => {
+        mockStrategy.triggerFileChange();
       });
 
       await waitFor(() => {
         expect(result.current.shouldReload).toBe(true);
       });
 
-      // Trigger first reload
+      // Start first reload without awaiting
       act(() => {
-        result.current.reload();
+        void result.current.reload();
+      });
+
+      // Try second reload while first is in progress
+      act(() => {
+        void result.current.reload();
+      });
+
+      // Only one call should be made
+      expect(onReloadMock).toHaveBeenCalledTimes(1);
+
+      // Complete the first reload
+      act(() => {
+        resolveReload?.();
       });
 
       await waitFor(() => {
-        expect(result.current.watchState.isReloading).toBe(true);
+        expect(result.current.watchState.isReloading).toBe(false);
       });
-
-      // Try to trigger second reload while first is in progress
-      act(() => {
-        result.current.reload();
-      });
-
-      // Should only call onReload once
-      expect(mockOnReload).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('reconnection logic', () => {
-    it('should set reconnecting status on connection error', async () => {
-      const { result } = renderHook(() => useFileWatch());
-
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      const eventSource = MockEventSource.instances[0]!;
-
-      // Simulate connection error
-      act(() => {
-        eventSource.dispatchError();
-      });
-
-      // Should show reconnecting status
-      expect(result.current.watchState.connectionStatus).toBe('reconnecting');
-    });
-
-    it('should show error after max reconnection attempts', async () => {
-      const { result } = renderHook(() => useFileWatch());
-
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      });
-
-      const eventSource = MockEventSource.instances[0]!;
-
-      // Simulate connection error
-      act(() => {
-        eventSource.dispatchError();
-      });
-
-      // Should show reconnecting status initially
-      expect(result.current.watchState.connectionStatus).toBe('reconnecting');
     });
   });
 
   describe('cleanup', () => {
-    it('should close connection on unmount', async () => {
-      const { result, unmount } = renderHook(() => useFileWatch());
+    it('should cleanup on unmount', async () => {
+      const cleanupMock = vi.fn();
+      mockStrategy.watchFilesMock.mockReturnValue(cleanupMock);
+
+      const { unmount } = renderHook(() => useFileWatch(undefined, mockStrategy));
 
       await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
+        expect(mockStrategy.watchFilesMock).toHaveBeenCalled();
       });
-
-      const eventSource = MockEventSource.instances[0]!;
 
       unmount();
 
-      expect(eventSource.close).toHaveBeenCalled();
+      expect(cleanupMock).toHaveBeenCalled();
     });
 
-    it('should clear timeouts on unmount', async () => {
-      const { result, unmount } = renderHook(() => useFileWatch());
+    it('should cleanup when strategy changes', async () => {
+      const cleanupMock = vi.fn();
+      mockStrategy.watchFilesMock.mockReturnValue(cleanupMock);
 
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
+      const { rerender } = renderHook(({ strategy }) => useFileWatch(undefined, strategy), {
+        initialProps: { strategy: mockStrategy as DiffSourceStrategy | null },
       });
 
-      const eventSource = MockEventSource.instances[0]!;
+      await waitFor(() => {
+        expect(mockStrategy.watchFilesMock).toHaveBeenCalled();
+      });
 
-      unmount();
+      // Change to a different strategy
+      const newStrategy = new MockStrategy();
+      rerender({ strategy: newStrategy as DiffSourceStrategy | null });
 
-      // Should close the connection
-      expect(eventSource.close).toHaveBeenCalled();
+      expect(cleanupMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle connection errors', () => {
+      const errorStrategy = new MockStrategy();
+      errorStrategy.watchFiles = vi.fn(() => {
+        throw new Error('Connection failed');
+      });
+
+      const { result } = renderHook(() => useFileWatch(undefined, errorStrategy));
+
+      expect(result.current.error).toBe('Failed to setup file watch');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to setup file watch:',
+        expect.any(Error)
+      );
     });
   });
 });

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { type DiffFile } from '../../types/diff';
-import { isStaticMode } from '../utils/staticMode';
+import type { DiffSourceStrategy } from '../strategies/types';
 
 interface ImageInfo {
   width?: number;
@@ -14,6 +14,7 @@ interface ImageDiffChunkProps {
   mode?: 'side-by-side' | 'inline';
   baseCommitish?: string;
   targetCommitish?: string;
+  strategy?: DiffSourceStrategy | null;
 }
 
 export function ImageDiffChunk({
@@ -21,6 +22,7 @@ export function ImageDiffChunk({
   mode = 'inline',
   baseCommitish,
   targetCommitish,
+  strategy,
 }: ImageDiffChunkProps) {
   const isDeleted = file.status === 'deleted';
   const isAdded = file.status === 'added';
@@ -70,9 +72,10 @@ export function ImageDiffChunk({
   };
 
   // Checkerboard background style for transparent images
-  // Helper to get image URL in static or server mode
+  // Helper to get image URL based on strategy
   const getImageUrl = (path: string, ref: string, version: 'old' | 'new') => {
-    if (isStaticMode()) {
+    // Use strategy to determine if we're in local mode
+    if (strategy?.name === 'local-file') {
       const baseName =
         path
           .split('/')
