@@ -87,8 +87,14 @@ describe('HtmlGenerator', () => {
       expect(capturedHtml).toContain('<script type="module" src="./assets/');
       expect(capturedHtml).toContain('<link rel="stylesheet" href="./assets/');
       expect(capturedHtml).toContain('<div id="root" data-static-mode="true"></div>');
-      // Should include favicon
-      expect(capturedHtml).toContain('<link rel="icon" type="image/svg+xml" href="./favicon.svg">');
+      // Should include favicon with dark mode support
+      expect(capturedHtml).toContain('<link rel="icon" href="./favicon.svg">');
+      expect(capturedHtml).toContain(
+        '<link rel="icon" href="./favicon.svg" media="(prefers-color-scheme: light)">'
+      );
+      expect(capturedHtml).toContain(
+        '<link rel="icon" href="./favicon-white.svg" media="(prefers-color-scheme: dark)">'
+      );
     });
 
     it('should copy client assets to output directory', async () => {

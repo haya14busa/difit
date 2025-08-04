@@ -115,12 +115,20 @@ async function copyFavicon(outputDir: string): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const projectRoot = join(__dirname, '..', '..');
-  const faviconPath = join(projectRoot, 'public', 'favicon.svg');
 
-  try {
-    await copyFile(faviconPath, join(outputDir, 'favicon.svg'));
-  } catch (error) {
-    console.warn('Favicon not found. Skipping favicon copy.', error);
+  // Copy both light and dark mode favicons
+  const favicons = [
+    { src: 'favicon.svg', dest: 'favicon.svg' },
+    { src: 'favicon-white.svg', dest: 'favicon-white.svg' },
+  ];
+
+  for (const favicon of favicons) {
+    const faviconPath = join(projectRoot, 'public', favicon.src);
+    try {
+      await copyFile(faviconPath, join(outputDir, favicon.dest));
+    } catch (error) {
+      console.warn(`${favicon.src} not found. Skipping favicon copy.`, error);
+    }
   }
 }
 
@@ -129,9 +137,11 @@ function generateHtmlTemplate(diffData: StaticDiffData, jsFile: string, cssFile:
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="./favicon.svg">
+  <link rel="icon" href="./favicon.svg" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="./favicon-white.svg" media="(prefers-color-scheme: dark)">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>difit - ${diffData.targetCommitish} vs ${diffData.baseCommitish}</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./assets/${cssFile}">
 </head>
 <body>
