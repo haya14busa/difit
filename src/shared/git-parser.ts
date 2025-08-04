@@ -72,6 +72,8 @@ export class GitDiffParser {
         commit: resolvedCommit,
         files,
         isEmpty: files.length === 0,
+        baseCommitish,
+        targetCommitish,
       };
     } catch (error) {
       throw new Error(
